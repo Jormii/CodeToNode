@@ -1,0 +1,9 @@
+{
+"python.autoComplete.extraPaths": [
+    "C:/Users/Jorge López Natal/Desktop/Universidad/Código/Blender Autocomplete/2.81a"
+],
+"python.linting.pylintArgs": [
+    "--init-hook",
+    "import sys; sys.path.append('C:/Users/Jorge López Natal/Desktop/Universidad/Código/Blender Autocomplete/2.81a')"
+]
+}
