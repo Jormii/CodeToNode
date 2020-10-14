@@ -1,32 +1,27 @@
+from scanner_c2n import Scanner
+
 import sys
-# import bpy
-
-from code_parser import Parser
-
-def create_material(material_name: str):
-    mat = bpy.data.materials.new(name = material_name)
-    mat.use_nodes = True
-    mat.node_tree.nodes.clear()
-
-    return mat
 
 def main():
-    number_of_arguments = len(sys.argv)
-    
-    # TODO: Add to final version
-    if 0:
-        if number_of_arguments != 2:
-            print("Error: Provide a .py file with the shader you want to parse")
-            exit(-1)
+    sys.path.append("./")
 
-        filename = sys.argv[1]
+    filename = "./test.py"
+    file = open(filename, mode="r")
+    source_code = file.read()
 
-    filename = "./test.py"  # TODO: Remove line
-    parser = Parser(filename)
-    parser.parse_file()
+    scanner = Scanner(filename, source_code)
+    tokens = scanner.perform_scanning()
 
-    # material_name = "New Material"
-    # mat = create_material(material_name)
+    if len(tokens) == 0:
+        return
+
+    line = tokens[0].line
+    for token in tokens:
+        if token.line != line:
+            print()
+            line = token.line
+
+        print(token)
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,15 @@
-from structures import *
+from structures_c2n import *
 
-def entry():
-    color = (1, 0, 0, 0)
-    roughness = 0
+def main():
+    color = (1, 2, 3, 4)
+    roughness = 5
+
+    l = 0   # AS
+    # SA
 
     diffuse_mat = DiffuseBSDF(color, roughness, None)
 
     return diffuse_mat, None, None
+
+def m(a, b, c, d):
+    return
