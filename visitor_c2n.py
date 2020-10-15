@@ -17,7 +17,7 @@ class BaseVisitor:
 class ExpressionPrinter(BaseVisitor):
 
     def visit_literal_expression(self, expression):
-        return "{}".format(expression.token.literal)
+        return "{}".format(expression.literal)
 
     def visit_grouping_expression(self, expression):
         expression_string = expression.expression.accept_visitor(self)

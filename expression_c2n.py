@@ -5,8 +5,8 @@ class BaseExpression:
 
 class LiteralExpression(BaseExpression):
 
-    def __init__(self, token):
-        self.token = token
+    def __init__(self, literal):
+        self.literal = literal
 
     def accept_visitor(self, visitor):
         return visitor.visit_literal_expression(self)
