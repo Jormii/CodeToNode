@@ -7,17 +7,22 @@ class Parser:
 
     def __init__(self, tokens):
         self.tokens = tokens
-        self.expressions = []
+        self.statements = []
         self.current = 0
 
     def parse(self):
-        try:
-            expression = self.expression()
-            self.expressions.append(expression)
-        except Exception as e:
-            sys.exit("Error found while parsing: {}".format(e))
+        while not self.is_at_end():
+            statement = self.statement()
+            self.statements.append(statement)
 
-        return self.expressions
+        return self.statements
+
+    def statement(self):
+        expression = self.expression()
+        
+        # TODO: Consider newlines
+        statement = ExpressionStatement(expression)
+        return statement
 
     def expression(self):
         return self.equality()

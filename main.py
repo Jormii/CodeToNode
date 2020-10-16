@@ -1,7 +1,8 @@
 from scanner_c2n import Scanner
+from parser_cn2 import Parser
+from interpreter_c2n import Interpreter
 
 from token_c2n import *
-from parser_cn2 import *
 from expression_c2n import *
 from visitor_c2n import ExpressionVisitor
 
@@ -24,14 +25,14 @@ def parse_tokens(tokens):
 
     return expressions
 
+def interpret_statements(statements, print_statements=True):
+    interpreter = Interpreter(print_statements)
+    interpreter.interpret(statements)
+
 def main():
     tokens = scan_tokens()
-    expressions = parse_tokens(tokens)
-
-    visitor = ExpressionVisitor()
-    for expression in expressions:
-        expression_string = expression.accept_visitor(visitor)
-        print(expression_string)
+    statements = parse_tokens(tokens)
+    interpret_statements(statements)
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,10 @@
+import sys
+
 class BaseExpression:
 
     def accept_visitor(self, visitor):
-        pass
+        sys.exit("Trying to call BaseExpression function \"{}\"".format(self.accept_visitor.__name__))
+
 
 class LiteralExpression(BaseExpression):
 
@@ -11,6 +14,7 @@ class LiteralExpression(BaseExpression):
     def accept_visitor(self, visitor):
         return visitor.visit_literal_expression(self)
 
+
 class GroupingExpression(BaseExpression):
 
     def __init__(self, expression):
@@ -18,6 +22,7 @@ class GroupingExpression(BaseExpression):
 
     def accept_visitor(self, visitor):
         return  visitor.visit_grouping_expression(self)
+
 
 class UnaryExpression(BaseExpression):
 
@@ -28,6 +33,7 @@ class UnaryExpression(BaseExpression):
     def accept_visitor(self, visitor):
         return visitor.visit_unary_expression(self)
 
+
 class BinaryExpression(BaseExpression):
 
     def __init__(self, left_expression, token, right_expression):
@@ -37,3 +43,12 @@ class BinaryExpression(BaseExpression):
 
     def accept_visitor(self, visitor):
         return visitor.visit_binary_expression(self)
+
+
+class ExpressionStatement(BaseExpression):
+
+    def __init__(self, expression):
+        self.expression = expression
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_statement(self)

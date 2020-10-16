@@ -16,6 +16,8 @@ class BaseVisitor:
     def visit_binary_expression(self, expression):
         sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_binary_expression.__name__))
 
+    def visit_statement(self, statement):
+        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_statement.__name__))
 
 class ExpressionPrinter(BaseVisitor):
 
@@ -34,6 +36,11 @@ class ExpressionPrinter(BaseVisitor):
         left_expression_string = expression.left_expression.accept_visitor(self)
         right_expression_string = expression.right_expression.accept_visitor(self)
         return "({} {} {})".format(expression.token.lexeme, left_expression_string, right_expression_string)
+
+    def visit_statement(self, statement):
+        statement_string = statement.expression.accept_visitor(self)
+        result = statement.expression.accept_visitor(ExpressionVisitor())
+        return "{} => {}".format(statement_string, result)
 
 
 class ExpressionVisitor(BaseVisitor):
@@ -90,6 +97,10 @@ class ExpressionVisitor(BaseVisitor):
             return left_value <= right_value
 
         # Shouldn't reach this point
+        return None
+
+    def visit_statement(self, statement):
+        self.evaluate(statement.expression)
         return None
 
     def evaluate(self, expression):
