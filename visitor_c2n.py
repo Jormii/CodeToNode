@@ -1,5 +1,7 @@
 import sys
 
+from token_c2n import TokenType
+
 class BaseVisitor:
 
     def visit_literal_expression(self, expression):
@@ -13,6 +15,7 @@ class BaseVisitor:
 
     def visit_binary_expression(self, expression):
         sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_binary_expression.__name__))
+
 
 class ExpressionPrinter(BaseVisitor):
 
@@ -32,16 +35,71 @@ class ExpressionPrinter(BaseVisitor):
         right_expression_string = expression.right_expression.accept_visitor(self)
         return "({} {} {})".format(expression.token.lexeme, left_expression_string, right_expression_string)
 
+
 class ExpressionVisitor(BaseVisitor):
 
     def visit_literal_expression(self, expression):
-        pass
+        return expression.literal
 
     def visit_grouping_expression(self, expression):
-        pass
+        return self.evaluate(expression.expression)
 
     def visit_unary_expression(self, expression):
-        pass
+        value = self.evaluate(expression.expression)
+
+        token_type = expression.token.token_type
+        if token_type == TokenType.SUBSTRACT:
+            return -value
+        if token_type == TokenType.NOT:
+            return not self.is_truthy(value)
+
+        # Shouldn't reach this point
+        return None
 
     def visit_binary_expression(self, expression):
-        pass
+        left_value = self.evaluate(expression.left_expression)
+        right_value = self.evaluate(expression.right_expression)
+
+        token_type = expression.token.token_type
+        if token_type == TokenType.ADD:
+            return left_value + right_value
+        if token_type == TokenType.SUBSTRACT:
+            return left_value - right_value
+        if token_type == TokenType.PRODUCT:
+            return left_value * right_value
+        if token_type == TokenType.DIVISION:
+            return left_value / right_value
+        if token_type == TokenType.FLOOR_DIVISION:
+            return left_value // right_value
+        if token_type == TokenType.MODULUS:
+            return left_value % right_value
+        if token_type == TokenType.POWER:
+            return left_value ** right_value
+
+        if token_type == TokenType.EQUAL:
+            return left_value == right_value
+        if token_type == TokenType.NOT_EQUAL:
+            return left_value != right_value
+        if token_type == TokenType.GREATER_THAN:
+            return left_value > right_value
+        if token_type == TokenType.GREATER_OR_EQUAL:
+            return left_value >= right_value
+        if token_type == TokenType.LESS_THAN:
+            return left_value < right_value
+        if token_type == TokenType.LESS_OR_EQUAL:
+            return left_value <= right_value
+
+        # Shouldn't reach this point
+        return None
+
+    def evaluate(self, expression):
+        return expression.accept_visitor(self)
+
+    def is_truthy(self, value):
+        if value is None:
+            return False
+
+        if isinstance(value, bool):
+            return value
+
+        return value == 0

@@ -3,7 +3,7 @@ from scanner_c2n import Scanner
 from token_c2n import *
 from parser_cn2 import *
 from expression_c2n import *
-from visitor_c2n import ExpressionPrinter
+from visitor_c2n import ExpressionVisitor
 
 import sys
 
@@ -28,7 +28,7 @@ def main():
     tokens = scan_tokens()
     expressions = parse_tokens(tokens)
 
-    visitor = ExpressionPrinter()
+    visitor = ExpressionVisitor()
     for expression in expressions:
         expression_string = expression.accept_visitor(visitor)
         print(expression_string)
