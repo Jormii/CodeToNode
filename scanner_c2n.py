@@ -42,6 +42,7 @@ class Scanner:
             self.start = self.current
             self.scan_token()
 
+        self.check_for_semicolon()
         self.add_final_right_curly_braces()
         self.tokens.append(Token(TokenType.EOF, self.line))
         return self.tokens
@@ -93,6 +94,7 @@ class Scanner:
             if self.found_character:
                 self.check_for_right_curly_braces()
                 self.found_character = False
+            self.check_for_semicolon()
             self.line += 1
             return
 
@@ -253,6 +255,18 @@ class Scanner:
             if token_i.line == line:
                 self.tokens.insert(i + 1, token)
                 return
+
+    def check_for_semicolon(self):
+        if len(self.tokens) == 0:
+            return
+
+        previous_token = self.tokens[-1]
+        token_type = previous_token.token_type
+        line = previous_token.line
+
+        if line == self.line and token_type != TokenType.LEFT_CURLY_BRACE:
+            semicolon_token = Token(TokenType.SEMICOLON, self.line, ";")
+            self.tokens.append(semicolon_token)
 
     def is_alphabetic(self, c):
         return c.isalpha() or c == "_"

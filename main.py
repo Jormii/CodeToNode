@@ -13,12 +13,31 @@ diffuse = "./tests/diffuse.py"
 
 
 def print_tokens(tokens):
+    print("--- TOKEN INFO ---")
     line = tokens[0].line
     for token in tokens:
         if token.line != line:
             line = token.line
             print()
         print(token)
+
+    print("\n--- CODE ---")
+    line = tokens[0].line
+    indentention = 0
+    for token in tokens:
+        if token.line != line:
+            line = token.line
+            print()
+            print("\t" * indentention, end="")
+
+        if token.token_type == TokenType.LEFT_CURLY_BRACE:
+            indentention += 1
+        elif token.token_type == TokenType.RIGHT_CURLY_BRACE:
+            indentention -= 1
+            print()
+            print("\t" * indentention, end="")
+
+        print(token.lexeme, end=" ")
 
 
 def scan_tokens(debug=False, filename=expression):
@@ -47,9 +66,9 @@ def interpret_statements(statements, print_statements=True):
 
 
 def main():
-    tokens = scan_tokens()
-    statements = parse_tokens(tokens)
-    interpret_statements(statements)
+    tokens = scan_tokens(debug=True, filename=diffuse)
+    # statements = parse_tokens(tokens)
+    # interpret_statements(statements)
 
 
 if __name__ == "__main__":

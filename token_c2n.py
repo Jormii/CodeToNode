@@ -49,6 +49,7 @@ class TokenType(Enum):
     NUMBER = auto()
 
     # Other
+    SEMICOLON = auto()
     EOF = auto()
 
     # TODO: Not yet supported
