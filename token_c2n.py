@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class TokenType(Enum):
     # Keywords
     IF = auto()
@@ -52,7 +53,7 @@ class TokenType(Enum):
 
     # TODO: Not yet supported
     # ELIF = 104
-    
+
     # TODO: Consider
     # BITWISE_AND = 30
     # BITWISE_OR = 31
@@ -84,6 +85,7 @@ class TokenType(Enum):
     # GLOBAL = 114
     # CONTINUE = 109
     # FOR = 110
+
 
 class Token:
 

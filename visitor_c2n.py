@@ -1,23 +1,23 @@
-import sys
-
 from token_c2n import TokenType
+
 
 class BaseVisitor:
 
     def visit_literal_expression(self, expression):
-        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_binary_expression.__name__))
+        raise NotImplementedError()
 
     def visit_grouping_expression(self, expression):
-        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_grouping_expression.__name__))
+        raise NotImplementedError()
 
     def visit_unary_expression(self, expression):
-        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_unary_expression.__name__))
+        raise NotImplementedError()
 
     def visit_binary_expression(self, expression):
-        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_binary_expression.__name__))
+        raise NotImplementedError()
 
     def visit_statement(self, statement):
-        sys.exit("Trying to call BaseVisitor function \"{}\"".format(self.visit_statement.__name__))
+        raise NotImplementedError()
+
 
 class ExpressionPrinter(BaseVisitor):
 
@@ -33,8 +33,10 @@ class ExpressionPrinter(BaseVisitor):
         return "({} {})".format(expression.token.lexeme, expression_string)
 
     def visit_binary_expression(self, expression):
-        left_expression_string = expression.left_expression.accept_visitor(self)
-        right_expression_string = expression.right_expression.accept_visitor(self)
+        left_expression_string = expression.left_expression.accept_visitor(
+            self)
+        right_expression_string = expression.right_expression.accept_visitor(
+            self)
         return "({} {} {})".format(expression.token.lexeme, left_expression_string, right_expression_string)
 
     def visit_statement(self, statement):

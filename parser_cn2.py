@@ -3,6 +3,7 @@ from expression_c2n import *
 
 import sys
 
+
 class Parser:
 
     def __init__(self, tokens):
@@ -19,9 +20,9 @@ class Parser:
 
     def statement(self):
         expression = self.expression()
-        
-        # TODO: Consider newlines
-        statement = ExpressionStatement(expression)
+
+        # TODO: Consider semicolons
+        statement = StatementExpression(expression)
         return statement
 
     def expression(self):
@@ -33,7 +34,8 @@ class Parser:
         while self.match([TokenType.EQUAL, TokenType.NOT_EQUAL]):
             operator = self.previous()
             right_expression = self.comparison()
-            expression = BinaryExpression(expression, operator, right_expression)
+            expression = BinaryExpression(
+                expression, operator, right_expression)
 
         return expression
 
@@ -41,10 +43,11 @@ class Parser:
         expression = self.term()
 
         while self.match([TokenType.GREATER_THAN, TokenType.GREATER_OR_EQUAL,
-            TokenType.LESS_THAN, TokenType.LESS_OR_EQUAL]):
+                          TokenType.LESS_THAN, TokenType.LESS_OR_EQUAL]):
             operator = self.previous()
             right_expression = self.term()
-            expression = BinaryExpression(expression, operator, right_expression)
+            expression = BinaryExpression(
+                expression, operator, right_expression)
 
         return expression
 
@@ -54,7 +57,8 @@ class Parser:
         while self.match([TokenType.ADD, TokenType.SUBSTRACT]):
             operator = self.previous()
             right_expression = self.factor()
-            expression = BinaryExpression(expression, operator, right_expression)
+            expression = BinaryExpression(
+                expression, operator, right_expression)
 
         return expression
 
@@ -62,10 +66,11 @@ class Parser:
         expression = self.power()
 
         while self.match([TokenType.PRODUCT, TokenType.DIVISION,
-            TokenType.FLOOR_DIVISION, TokenType.MODULUS]):
+                          TokenType.FLOOR_DIVISION, TokenType.MODULUS]):
             operator = self.previous()
             right_expression = self.power()
-            expression = BinaryExpression(expression, operator, right_expression)
+            expression = BinaryExpression(
+                expression, operator, right_expression)
 
         return expression
 
@@ -75,10 +80,11 @@ class Parser:
         while self.match([TokenType.POWER]):
             operator = self.previous()
             right_expression = self.unary()
-            expression = BinaryExpression(expression, operator, right_expression)
+            expression = BinaryExpression(
+                expression, operator, right_expression)
 
         return expression
-    
+
     def unary(self):
         if self.match([TokenType.NOT, TokenType.SUBSTRACT]):
             operator = self.previous()
@@ -125,7 +131,7 @@ class Parser:
     def check(self, token_type):
         if self.is_at_end():
             return False
-        
+
         return self.peek().token_type == token_type
 
     def match(self, token_types):
@@ -140,7 +146,8 @@ class Parser:
         if self.check(token_type):
             return self.advance()
 
-        raise Exception("Error parsing: Expecting \"{}\"".format(token_type.name))
+        raise Exception(
+            "Error parsing: Expecting \"{}\"".format(token_type.name))
 
     def synchronize(self):
         self.advance()

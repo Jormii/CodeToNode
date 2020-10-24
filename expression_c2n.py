@@ -1,12 +1,13 @@
 import sys
 
-class BaseExpression:
+
+class VisitorAccepter:
 
     def accept_visitor(self, visitor):
-        sys.exit("Trying to call BaseExpression function \"{}\"".format(self.accept_visitor.__name__))
+        raise NotImplementedError()
 
 
-class LiteralExpression(BaseExpression):
+class LiteralExpression(VisitorAccepter):
 
     def __init__(self, literal):
         self.literal = literal
@@ -15,17 +16,18 @@ class LiteralExpression(BaseExpression):
         return visitor.visit_literal_expression(self)
 
 
-class GroupingExpression(BaseExpression):
+class GroupingExpression(VisitorAccepter):
 
     def __init__(self, expression):
-        self.expression = expression
+        self.expression = expression    # Translates to (<expression>)
 
     def accept_visitor(self, visitor):
-        return  visitor.visit_grouping_expression(self)
+        return visitor.visit_grouping_expression(self)
 
 
-class UnaryExpression(BaseExpression):
+class UnaryExpression(VisitorAccepter):
 
+    # <unary operation token><expression>, e.g. -5 or not(a and b)
     def __init__(self, token, expression):
         self.token = token
         self.expression = expression
@@ -34,8 +36,9 @@ class UnaryExpression(BaseExpression):
         return visitor.visit_unary_expression(self)
 
 
-class BinaryExpression(BaseExpression):
+class BinaryExpression(VisitorAccepter):
 
+    # <left_expression><binary operation token><right expression>, e.g. a + b
     def __init__(self, left_expression, token, right_expression):
         self.left_expression = left_expression
         self.token = token
@@ -45,7 +48,7 @@ class BinaryExpression(BaseExpression):
         return visitor.visit_binary_expression(self)
 
 
-class ExpressionStatement(BaseExpression):
+class StatementExpression(VisitorAccepter):
 
     def __init__(self, expression):
         self.expression = expression

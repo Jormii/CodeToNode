@@ -1,4 +1,4 @@
-from loggger_c2n import log_error
+from logger_c2n import log_error
 from token_c2n import Token, TokenType
 
 import sys
