@@ -1,21 +1,26 @@
 from loggger_c2n import log_error
 from token_c2n import Token, TokenType
 
+import sys
 import keyword
+import numpy as np
+
 
 class Scanner:
 
     keywords = {
-        "True" : TokenType.TRUE,
-        "False" : TokenType.FALSE,
-        "None" : TokenType.NONE,
-        "and" : TokenType.AND,
-        "or" : TokenType.OR,
-        "not" : TokenType.NOT,
-        "def" : TokenType.DEF,
-        "return" : TokenType.RETURN,
-        "from" : TokenType.FROM,
-        "import" : TokenType.IMPORT
+        "if": TokenType.IF,
+        "else": TokenType.ELSE,
+        "True": TokenType.TRUE,
+        "False": TokenType.FALSE,
+        "None": TokenType.NONE,
+        "and": TokenType.AND,
+        "or": TokenType.OR,
+        "not": TokenType.NOT,
+        "def": TokenType.DEF,
+        "return": TokenType.RETURN,
+        "from": TokenType.FROM,
+        "import": TokenType.IMPORT
     }
 
     unsupported_keywords = set(keyword.kwlist) - set(keywords.keys())
@@ -23,18 +28,58 @@ class Scanner:
     def __init__(self, filename, source_code):
         self.filename = filename
         self.source = source_code
+        self.indentations = [0]
         self.tokens = []
         self.start = 0
         self.current = 0
         self.line = 1
+        self.found_character = False
 
     def perform_scanning(self):
+        self.calculate_indentations()
+
         while not self.is_at_end():
             self.start = self.current
             self.scan_token()
 
+        self.add_final_right_curly_braces()
         self.tokens.append(Token(TokenType.EOF, self.line))
         return self.tokens
+
+    def calculate_indentations(self):
+        found_character = False
+        found_spaces = False
+        for c in self.source:
+            if c == "\n":
+                found_character = False
+                self.indentations.append(0)
+            elif c in " \t":
+                if found_character:
+                    continue
+
+                self.indentations[-1] += 1
+
+                if c == " ":
+                    found_spaces = True
+            else:
+                found_character = True
+
+        if found_spaces:
+            self.translate_spaces_to_tabs()
+
+    def translate_spaces_to_tabs(self):
+        indentations_np = np.array(self.indentations)
+        indentations_np_no_zeros = np.where(
+            indentations_np == 0, sys.maxsize, indentations_np)
+        minimum = np.min(indentations_np_no_zeros)
+
+        modulo = indentations_np % minimum
+        for i in range(len(modulo)):
+            if modulo[i] != 0:
+                log_error(self.filename, i, "Indentation error")
+
+        tabs = indentations_np // minimum
+        self.indentations = tabs.tolist()
 
     def is_at_end(self):
         return self.current >= len(self.source)
@@ -42,13 +87,18 @@ class Scanner:
     def scan_token(self):
         c = self.advance()
 
-        if c in " \r\t":
-            # TODO: Consider tabs
+        if c in " \t\r":
             return
-        
         if c == "\n":
+            if self.found_character:
+                self.check_for_right_curly_braces()
+                self.found_character = False
             self.line += 1
-        elif c == "(":
+            return
+
+        self.found_character = True
+
+        if c == "(":
             self.add_token(TokenType.LEFT_PARENTHESIS)
         elif c == ")":
             self.add_token(TokenType.RIGHT_PARENTHESIS)
@@ -57,7 +107,7 @@ class Scanner:
         elif c == ",":
             self.add_token(TokenType.COMMA)
         elif c == ":":
-            self.add_token(TokenType.COLON)
+            self.add_left_curly_brace()
         elif c == "+":
             self.add_token(TokenType.ADD)
         elif c == "-":
@@ -76,8 +126,9 @@ class Scanner:
         elif c == "!":
             next_is_equal = self.next_matches("=")
             if not next_is_equal:
-                log_error(self.filename, self.line, "! character doesn't precede =")
-            
+                log_error(self.filename, self.line,
+                          "! character doesn't precede =")
+
             self.add_token(TokenType.NOT_EQUAL)
         elif c == "=":
             next_is_equal = self.next_matches("=")
@@ -100,12 +151,13 @@ class Scanner:
         elif self.is_alphabetic(c):
             self.scan_identifier()
         else:
-            log_error(self.filename, self.line, "Unexpected character \"{}\"".format(c))
+            log_error(self.filename, self.line,
+                      "Unexpected character \"{}\"".format(c))
 
     def peek(self):
         if self.is_at_end():
             return "\0"
-        
+
         return self.source[self.current]
 
     def peek_next(self):
@@ -138,7 +190,7 @@ class Scanner:
 
             while self.peek().isnumeric():
                 self.advance()
-            
+
         number_substring = self.source[self.start:self.current]
         self.add_token(TokenType.NUMBER, float(number_substring))
 
@@ -149,14 +201,58 @@ class Scanner:
         identifier = self.source[self.start:self.current]
 
         if identifier in Scanner.unsupported_keywords:
-            log_error(self.filename, self.line, "Found unsupported keyword \"{}\"".format(identifier))
+            log_error(self.filename, self.line,
+                      "Found unsupported keyword \"{}\"".format(identifier))
 
-        token_type = TokenType.IDENTIFIER if identifier not in Scanner.keywords else Scanner.keywords[identifier]
+        token_type = TokenType.IDENTIFIER if identifier not in Scanner.keywords else Scanner.keywords[
+            identifier]
         self.add_token(token_type)
 
     def add_token(self, token_type, literal=None):
-        text = self.source[self.start:self.current]
-        self.tokens.append(Token(token_type, self.line, text, literal))
+        lexeme = self.source[self.start:self.current]
+        self.tokens.append(Token(token_type, self.line, lexeme, literal))
+
+    def add_left_curly_brace(self):
+        self.tokens.append(Token(TokenType.LEFT_CURLY_BRACE, self.line, "{"))
+
+    def check_for_right_curly_braces(self):
+        previous_token = self.find_previous_token()
+        if previous_token is None:
+            return
+
+        last_token_line = previous_token.line
+        previous_indentation_level = self.indentations[last_token_line - 1]
+        this_line_indentation_level = self.indentations[self.line - 1]
+
+        if this_line_indentation_level < previous_indentation_level:
+            difference = previous_indentation_level - this_line_indentation_level
+            for i in range(difference):
+                self.add_right_curly_brace(last_token_line)
+
+    def find_previous_token(self):
+        for i in range(len(self.tokens) - 1, -1, -1):
+            token_i = self.tokens[i]
+            if token_i.line < self.line:
+                return token_i
+
+        return None
+
+    def add_final_right_curly_braces(self):
+        if len(self.tokens) == 0:
+            return
+
+        last_token_line = self.tokens[-1].line
+        previous_indentation_level = self.indentations[last_token_line - 1]
+        for i in range(previous_indentation_level):
+            self.add_right_curly_brace(self.line)
+
+    def add_right_curly_brace(self, line):
+        token = Token(TokenType.RIGHT_CURLY_BRACE, line, "}")
+        for i in range(len(self.tokens) - 1, -1, -1):
+            token_i = self.tokens[i]
+            if token_i.line == line:
+                self.tokens.insert(i + 1, token)
+                return
 
     def is_alphabetic(self, c):
         return c.isalpha() or c == "_"

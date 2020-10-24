@@ -2,6 +2,8 @@ from enum import Enum, auto
 
 class TokenType(Enum):
     # Keywords
+    IF = auto()
+    ELSE = auto()
     TRUE = auto()
     FALSE = auto()
     NONE = auto()
@@ -12,7 +14,7 @@ class TokenType(Enum):
     RETURN = auto()
     FROM = auto()
     IMPORT = auto()
-    
+
     # Arithmetic operators
     ADD = auto()
     SUBSTRACT = auto()
@@ -38,7 +40,8 @@ class TokenType(Enum):
     RIGHT_PARENTHESIS = auto()
     DOT = auto()
     COMMA = auto()
-    COLON = auto()
+    LEFT_CURLY_BRACE = auto()
+    RIGHT_CURLY_BRACE = auto()
 
     # Literals
     IDENTIFIER = auto()
@@ -48,9 +51,7 @@ class TokenType(Enum):
     EOF = auto()
 
     # TODO: Not yet supported
-    # IF = 103
     # ELIF = 104
-    # ELSE = 105
     
     # TODO: Consider
     # BITWISE_AND = 30

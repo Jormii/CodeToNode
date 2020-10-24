@@ -8,14 +8,26 @@ from visitor_c2n import ExpressionVisitor
 
 import sys
 
-filename = "./tests/expression.py"
+filename = "./tests/diffuse.py"
 
-def scan_tokens():
+def print_tokens(tokens):
+    line = tokens[0].line
+    indentation = 0
+    for token in tokens:
+        if token.line != line:
+            line = token.line
+            print()
+        print(token)
+
+def scan_tokens(debug=False):
     file = open(filename, mode="r")
     source_code = file.read()
 
     scanner = Scanner(filename, source_code)
     tokens = scanner.perform_scanning()
+
+    if debug:
+        print_tokens(tokens)
 
     return tokens
 
@@ -30,9 +42,9 @@ def interpret_statements(statements, print_statements=True):
     interpreter.interpret(statements)
 
 def main():
-    tokens = scan_tokens()
-    statements = parse_tokens(tokens)
-    interpret_statements(statements)
+    tokens = scan_tokens(True)
+    # statements = parse_tokens(tokens)
+    # interpret_statements(statements)
 
 if __name__ == "__main__":
     main()
