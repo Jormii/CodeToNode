@@ -10,6 +10,15 @@ class Environment:
     def define(self, name, value):
         self.values[name] = value
 
+    def assign(self, token, value):
+        name = token.lexeme
+        if name in self.values:
+            self.values[name] = value
+            return
+
+        log_error(self.filename, token.line,
+                  "Undefined variable \"{}\"".format(name))
+
     def get(self, token):
         name = token.lexeme
         if name in self.values:

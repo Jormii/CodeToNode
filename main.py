@@ -11,7 +11,7 @@ import sys
 expression = "./tests/expression.py"
 diffuse = "./tests/diffuse.py"
 
-default_file = diffuse
+default_file = expression
 
 
 def print_tokens(tokens):
@@ -80,17 +80,15 @@ def parse_tokens(tokens, filename=default_file, debug=False):
     return expressions
 
 
-def interpret_statements(statements, filename=default_file):
-    interpreter = Interpreter(filename)
+def interpret_statements(statements, debug=False, filename=default_file):
+    interpreter = Interpreter(filename, debug)
     interpreter.interpret(statements)
-
-    print(interpreter.environment.values)
 
 
 def main():
-    tokens = scan_tokens(debug=True)
-    statements = parse_tokens(tokens, debug=True)
-    interpret_statements(statements)
+    tokens = scan_tokens()
+    statements = parse_tokens(tokens)
+    interpret_statements(statements, debug=True)
 
 
 if __name__ == "__main__":

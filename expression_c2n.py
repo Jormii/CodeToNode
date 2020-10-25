@@ -1,6 +1,3 @@
-import sys
-
-
 class VisitorAccepter:
 
     def accept_visitor(self, visitor):
@@ -34,6 +31,16 @@ class UnaryExpression(VisitorAccepter):
 
     def accept_visitor(self, visitor):
         return visitor.visit_unary_expression(self)
+
+
+class AssignmentExpression(VisitorAccepter):
+
+    def __init__(self, token, expression):
+        self.token = token
+        self.expression = expression
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_assignment_expression(self)
 
 
 class BinaryExpression(VisitorAccepter):

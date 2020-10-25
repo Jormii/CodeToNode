@@ -12,6 +12,9 @@ class BaseVisitor:
     def visit_unary_expression(self, expression):
         raise NotImplementedError()
 
+    def visit_assigment_expression(self, expression):
+        raise NotImplementedError()
+
     def visit_binary_expression(self, expression):
         raise NotImplementedError()
 
@@ -38,6 +41,12 @@ class ExpressionPrinter(BaseVisitor):
         expression_string = expression.expression.accept_visitor(self)
         return "({} {})".format(expression.token.lexeme, expression_string)
 
+    def visit_assigment_expression(self, expression):
+        token = expression.token
+        assigment = expression.expression
+
+        return "{} = {}".format(token.lexeme, assigment.accept_visitor(self))
+
     def visit_binary_expression(self, expression):
         left_expression_string = expression.left_expression.accept_visitor(
             self)
@@ -47,12 +56,11 @@ class ExpressionPrinter(BaseVisitor):
 
     def visit_variable_expression(self, expression):
         token = expression.token
-        return "{} = TODO".format(token.lexeme)
+        return "{}".format(token.lexeme)
 
     def visit_statement(self, statement):
         statement_string = statement.expression.accept_visitor(self)
-        result = statement.expression.accept_visitor(ExpressionVisitor())
-        return "{} => {}".format(statement_string, result)
+        return "{}".format(statement_string)
 
     def visit_variable_declaration(self, expression):
         token = expression.token

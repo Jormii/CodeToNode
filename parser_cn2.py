@@ -48,7 +48,22 @@ class Parser:
         return statement
 
     def expression(self):
-        return self.equality()
+        return self.assignment()
+
+    def assignment(self):
+        expression = self.equality()
+
+        if self.match([TokenType.ASSIGMENT]):
+            assigment_token = self.previous()
+            value = self.assignment()
+
+            if value is VariableExpression:
+                token = value.token
+                return AssignmentExpression(token, value)
+
+            log_error(self.filename, assigment_token.line, "Invalid assigment")
+
+        return expression
 
     def equality(self):
         expression = self.comparison()
