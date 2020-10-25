@@ -16,6 +16,7 @@ default_file = diffuse
 
 def print_tokens(tokens):
     print("--- TOKEN INFO ---")
+
     line = tokens[0].line
     for token in tokens:
         if token.line != line:
@@ -25,11 +26,13 @@ def print_tokens(tokens):
 
     print("\n--- CODE ---")
     line = tokens[0].line
+    print("{}:\t".format(line), end="")
     indentention = 0
     for token in tokens:
         if token.line != line:
             line = token.line
             print()
+            print("{}:\t".format(line), end="")
             print("\t" * indentention, end="")
 
         if token.token_type == TokenType.LEFT_CURLY_BRACE:
@@ -37,9 +40,12 @@ def print_tokens(tokens):
         elif token.token_type == TokenType.RIGHT_CURLY_BRACE:
             indentention -= 1
             print()
+            print("\t", end="")
             print("\t" * indentention, end="")
 
-        print(token.lexeme, end=" ")
+        lexeme = token.lexeme
+        print(lexeme if lexeme != "" else token.token_type.name, end=" ")
+    print()
 
 
 def scan_tokens(debug=False, filename=default_file):
@@ -51,6 +57,8 @@ def scan_tokens(debug=False, filename=default_file):
 
     if debug:
         print_tokens(tokens)
+        print("Indentations:", scanner.indentations,
+              "-", len(scanner.indentations))
 
     return tokens
 
@@ -80,7 +88,7 @@ def interpret_statements(statements, filename=default_file):
 
 
 def main():
-    tokens = scan_tokens()
+    tokens = scan_tokens(debug=True)
     statements = parse_tokens(tokens, debug=True)
     interpret_statements(statements)
 

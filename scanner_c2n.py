@@ -208,6 +208,13 @@ class Scanner:
 
         token_type = TokenType.IDENTIFIER if identifier not in Scanner.keywords else Scanner.keywords[
             identifier]
+
+        # Ignore "from" and "import" statements
+        if token_type in [TokenType.FROM, TokenType.IMPORT]:
+            while self.peek() != "\n" and not self.is_at_end():
+                self.advance()
+            return
+
         self.add_token(token_type)
 
     def add_token(self, token_type, literal=None):
@@ -246,7 +253,7 @@ class Scanner:
         last_token_line = self.tokens[-1].line
         previous_indentation_level = self.indentations[last_token_line - 1]
         for i in range(previous_indentation_level):
-            self.add_right_curly_brace(self.line)
+            self.add_right_curly_brace(last_token_line)
 
     def add_right_curly_brace(self, line):
         token = Token(TokenType.RIGHT_CURLY_BRACE, line, "}")
