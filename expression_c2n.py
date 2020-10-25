@@ -48,10 +48,30 @@ class BinaryExpression(VisitorAccepter):
         return visitor.visit_binary_expression(self)
 
 
-class StatementExpression(VisitorAccepter):
+class VariableExpression(VisitorAccepter):
+
+    def __init__(self, token):
+        self.token = token
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_variable_expression(self)
+
+
+class Expression(VisitorAccepter):
 
     def __init__(self, expression):
         self.expression = expression
 
     def accept_visitor(self, visitor):
         return visitor.visit_statement(self)
+
+
+class Variable(VisitorAccepter):
+
+    # <identifier_token> = <expression>
+    def __init__(self, token, expression):
+        self.token = token
+        self.expression = expression
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_variable_declaration(self)

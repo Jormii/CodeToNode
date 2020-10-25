@@ -4,12 +4,14 @@ from interpreter_c2n import Interpreter
 
 from token_c2n import *
 from expression_c2n import *
-from visitor_c2n import ExpressionVisitor
+from visitor_c2n import ExpressionPrinter
 
 import sys
 
 expression = "./tests/expression.py"
 diffuse = "./tests/diffuse.py"
+
+default_file = diffuse
 
 
 def print_tokens(tokens):
@@ -40,7 +42,7 @@ def print_tokens(tokens):
         print(token.lexeme, end=" ")
 
 
-def scan_tokens(debug=False, filename=expression):
+def scan_tokens(debug=False, filename=default_file):
     file = open(filename, mode="r")
     source_code = file.read()
 
@@ -53,21 +55,33 @@ def scan_tokens(debug=False, filename=expression):
     return tokens
 
 
-def parse_tokens(tokens):
-    parser = Parser(tokens)
+def print_expressions(expressions):
+    visitor = ExpressionPrinter()
+    for expression in expressions:
+        expression_str = expression.accept_visitor(visitor)
+        print(expression_str)
+
+
+def parse_tokens(tokens, filename=default_file, debug=False):
+    parser = Parser(filename, tokens)
     expressions = parser.parse()
+
+    if debug:
+        print_expressions(expressions)
 
     return expressions
 
 
-def interpret_statements(statements, print_statements=True):
-    interpreter = Interpreter(print_statements)
+def interpret_statements(statements, filename=default_file):
+    interpreter = Interpreter(filename)
     interpreter.interpret(statements)
+
+    print(interpreter.environment.values)
 
 
 def main():
     tokens = scan_tokens()
-    statements = parse_tokens(tokens)
+    statements = parse_tokens(tokens, debug=True)
     interpret_statements(statements)
 
 

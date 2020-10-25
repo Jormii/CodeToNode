@@ -1,28 +1,50 @@
 from token_c2n import *
 from expression_c2n import *
+from logger_c2n import log_error
 
 import sys
 
 
 class Parser:
 
-    def __init__(self, tokens):
+    def __init__(self, filename, tokens):
+        self.filename = filename
         self.tokens = tokens
         self.statements = []
         self.current = 0
 
     def parse(self):
         while not self.is_at_end():
-            statement = self.statement()
+            statement = self.declaration()
             self.statements.append(statement)
 
         return self.statements
+
+    def declaration(self):
+        try:
+            if self.match([TokenType.IDENTIFIER]):
+                return self.var_declaration()
+
+            return self.statement()
+        except Exception as e:
+            self.synchronize()
+            log_error(self.filename, self.previous().line, "Syntax error")
+
+    def var_declaration(self):
+        identifier_token = self.previous()
+        self.consume(TokenType.ASSIGMENT)
+
+        initializer = self.expression()
+        self.consume(TokenType.SEMICOLON)
+
+        declaration = Variable(identifier_token, initializer)
+        return declaration
 
     def statement(self):
         expression = self.expression()
 
         self.consume(TokenType.SEMICOLON)
-        statement = StatementExpression(expression)
+        statement = Expression(expression)
         return statement
 
     def expression(self):
@@ -101,6 +123,9 @@ class Parser:
         if self.match([TokenType.NONE]):
             return LiteralExpression(None)
 
+        if self.match([TokenType.IDENTIFIER]):
+            token = self.previous()
+            return VariableExpression(token)
         if self.match([TokenType.NUMBER]):
             literal = self.previous().literal
             return LiteralExpression(literal)
@@ -153,8 +178,11 @@ class Parser:
         self.advance()
 
         while not self.is_at_end():
+            if self.previous().token_type == TokenType.SEMICOLON:
+                return
+
             token = self.peek()
             if token.token_type in [TokenType.DEF, TokenType.RETURN]:
                 return
 
-        self.advance()
+            self.advance()
