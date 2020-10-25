@@ -66,9 +66,9 @@ def interpret_statements(statements, print_statements=True):
 
 
 def main():
-    tokens = scan_tokens(debug=True, filename=diffuse)
-    # statements = parse_tokens(tokens)
-    # interpret_statements(statements)
+    tokens = scan_tokens()
+    statements = parse_tokens(tokens)
+    interpret_statements(statements)
 
 
 if __name__ == "__main__":

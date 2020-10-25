@@ -21,7 +21,7 @@ class Parser:
     def statement(self):
         expression = self.expression()
 
-        # TODO: Consider semicolons
+        self.consume(TokenType.SEMICOLON)
         statement = StatementExpression(expression)
         return statement
 
