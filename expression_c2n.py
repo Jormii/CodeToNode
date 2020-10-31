@@ -113,3 +113,13 @@ class Variable(VisitorAccepter):
 
     def accept_visitor(self, visitor):
         return visitor.visit_variable_declaration(self)
+
+
+class While(VisitorAccepter):
+
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_while(self)

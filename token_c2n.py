@@ -7,6 +7,7 @@ class TokenType(Enum):
     ELSE = auto()
     TRUE = auto()
     FALSE = auto()
+    WHILE = auto()
     NONE = auto()
     AND = auto()
     OR = auto()
@@ -82,7 +83,6 @@ class TokenType(Enum):
     # RIGHT_BOX_BRACKET = 83
     # STRING = 91
     # BREAK = 107
-    # WHILE = 113
     # GLOBAL = 114
     # CONTINUE = 109
     # FOR = 110

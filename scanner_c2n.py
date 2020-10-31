@@ -13,6 +13,7 @@ class Scanner:
         "else": TokenType.ELSE,
         "True": TokenType.TRUE,
         "False": TokenType.FALSE,
+        "while": TokenType.WHILE,
         "None": TokenType.NONE,
         "and": TokenType.AND,
         "or": TokenType.OR,

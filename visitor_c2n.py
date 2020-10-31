@@ -36,6 +36,9 @@ class BaseVisitor:
     def visit_variable_declaration(self, expression):
         raise NotImplementedError()
 
+    def visit_while(self, expression):
+        raise NotImplementedError()
+
 
 class ExpressionPrinter(BaseVisitor):
 
@@ -110,3 +113,9 @@ class ExpressionPrinter(BaseVisitor):
 
         declaration_str = declaration.accept_visitor(self)
         return "{} = {}".format(token.lexeme, declaration_str)
+
+    def visit_while(self, expression):
+        condition_string = expression.condition.accept_visitor(self)
+        body_string = expression.condition.accept_visitor(self)
+
+        return "while ({})\n{}".format(condition_string, body_string)

@@ -11,8 +11,9 @@ import sys
 branching = "./tests/branching.py"
 expression = "./tests/expression.py"
 diffuse = "./tests/diffuse.py"
+while_test = "./tests/while.py"
 
-default_file = branching
+default_file = while_test
 
 
 def print_tokens(tokens):

@@ -156,3 +156,12 @@ class Interpreter(BaseVisitor):
             print("{} = {}".format(token_str, value))
 
         return None
+
+    def visit_while(self, expression):
+        condition = expression.condition
+        body = expression.body
+
+        while self.is_truthy(self.evaluate(condition)):
+            self.execute(body)
+
+        return None

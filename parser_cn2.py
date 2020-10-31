@@ -43,6 +43,8 @@ class Parser:
     def statement(self):
         if self.match([TokenType.IF]):
             return self.if_statement()
+        elif self.match([TokenType.WHILE]):
+            return self.while_statement()
         elif self.match([TokenType.LEFT_CURLY_BRACE]):
             block = self.block()
             return Block(block)
@@ -58,6 +60,12 @@ class Parser:
             else_branch = self.statement()
 
         return If(condition, then_branch, else_branch)
+
+    def while_statement(self):
+        condition = self.expression()
+        body = self.statement()
+
+        return While(condition, body)
 
     def block(self):
         statements = []
