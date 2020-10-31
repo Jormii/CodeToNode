@@ -25,6 +25,19 @@ class Interpreter(BaseVisitor):
     def visit_grouping_expression(self, expression):
         return self.evaluate(expression.expression)
 
+    def visit_logical_expression(self, expression):
+        left = self.evaluate(expression.left_expression)
+        operator_type = expression.token.token_type
+
+        if operator_type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(expression.right_expression)
+
     def visit_unary_expression(self, expression):
         value = self.evaluate(expression.expression)
 
@@ -119,6 +132,15 @@ class Interpreter(BaseVisitor):
             return value
 
         return value == 0
+
+    def visit_if(self, if_statement):
+        condition = if_statement.condition
+        if self.is_truthy(self.evaluate(condition)):
+            self.execute(if_statement.then_branch)
+        elif if_statement.else_branch is not None:
+            self.execute(if_statement.else_branch)
+
+        return None
 
     def visit_variable_declaration(self, expression):
         initializer = expression.expression

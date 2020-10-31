@@ -10,7 +10,6 @@
     area = pi * r ** 2
 
 :
-    pi = 3.14
     r = 8
     perimetro = 2 * pi * r
     area = pi * r ** 2

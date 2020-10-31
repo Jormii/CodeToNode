@@ -22,6 +22,17 @@ class GroupingExpression(VisitorAccepter):
         return visitor.visit_grouping_expression(self)
 
 
+class LogicalExpression(VisitorAccepter):
+
+    def __init__(self, left_expression, token, right_expression):
+        self.left_expression = left_expression
+        self.token = token
+        self.right_expression = right_expression
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_logical_expression(self)
+
+
 class UnaryExpression(VisitorAccepter):
 
     # <unary operation token><expression>, e.g. -5 or not(a and b)
@@ -80,6 +91,17 @@ class Expression(VisitorAccepter):
 
     def accept_visitor(self, visitor):
         return visitor.visit_statement(self)
+
+
+class If(VisitorAccepter):
+
+    def __init__(self, condition, then_branch, else_branch):
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_if(self)
 
 
 class Variable(VisitorAccepter):

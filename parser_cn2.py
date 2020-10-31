@@ -41,22 +41,23 @@ class Parser:
         return declaration
 
     def statement(self):
-        if self.match([TokenType.LEFT_CURLY_BRACE]):
+        if self.match([TokenType.IF]):
+            return self.if_statement()
+        elif self.match([TokenType.LEFT_CURLY_BRACE]):
             block = self.block()
             return Block(block)
 
         return self.expression_statement()
 
-    def expression_statement(self):
-        expression = self.expression()
-        self.consume(TokenType.SEMICOLON)
-        return Expression(expression)
+    def if_statement(self):
+        condition = self.expression()
 
-    def check_statement(self):
-        if self.match([TokenType.LEFT_CURLY_BRACE]):
-            return Block(self.block())
+        then_branch = self.statement()
+        else_branch = None
+        if self.match([TokenType.ELSE]):
+            else_branch = self.statement()
 
-        return self.expression()
+        return If(condition, then_branch, else_branch)
 
     def block(self):
         statements = []
@@ -67,11 +68,16 @@ class Parser:
         self.consume(TokenType.RIGHT_CURLY_BRACE)
         return statements
 
+    def expression_statement(self):
+        expression = self.expression()
+        self.consume(TokenType.SEMICOLON)
+        return Expression(expression)
+
     def expression(self):
         return self.assignment()
 
     def assignment(self):
-        expression = self.equality()
+        expression = self.or_expr()
 
         if self.match([TokenType.ASSIGMENT]):
             assigment_token = self.previous()
@@ -82,6 +88,28 @@ class Parser:
                 return AssignmentExpression(token, value)
 
             log_error(self.filename, assigment_token.line, "Invalid assigment")
+
+        return expression
+
+    def or_expr(self):
+        expression = self.and_expr()
+
+        while self.match([TokenType.OR]):
+            operator = self.previous()
+            right_expression = self.and_expr()
+            expression = LogicalExpression(
+                expression, operator, right_expression)
+
+        return expression
+
+    def and_expr(self):
+        expression = self.equality()
+
+        while self.match([TokenType.AND]):
+            operator = self.previous()
+            right_expression = self.equality()
+            expression = LogicalExpression(
+                expression, operator, right_expression)
 
         return expression
 
@@ -151,9 +179,9 @@ class Parser:
         return self.primary()
 
     def primary(self):
-        if self.match([TokenType.FALSE]):
-            return LiteralExpression(True)
         if self.match([TokenType.TRUE]):
+            return LiteralExpression(True)
+        if self.match([TokenType.FALSE]):
             return LiteralExpression(False)
         if self.match([TokenType.NONE]):
             return LiteralExpression(None)

@@ -8,10 +8,11 @@ from visitor_c2n import ExpressionPrinter
 
 import sys
 
+branching = "./tests/branching.py"
 expression = "./tests/expression.py"
 diffuse = "./tests/diffuse.py"
 
-default_file = expression
+default_file = branching
 
 
 def print_tokens(tokens):
