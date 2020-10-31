@@ -65,8 +65,8 @@ def scan_tokens(debug=False, filename=default_file):
 
 def print_expressions(expressions):
     visitor = ExpressionPrinter()
-    for expression in expressions:
-        expression_str = expression.accept_visitor(visitor)
+    for expr in expressions:
+        expression_str = expr.accept_visitor(visitor)
         print(expression_str)
 
 

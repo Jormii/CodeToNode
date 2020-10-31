@@ -41,11 +41,31 @@ class Parser:
         return declaration
 
     def statement(self):
-        expression = self.expression()
+        if self.match([TokenType.LEFT_CURLY_BRACE]):
+            block = self.block()
+            return Block(block)
 
+        return self.expression_statement()
+
+    def expression_statement(self):
+        expression = self.expression()
         self.consume(TokenType.SEMICOLON)
-        statement = Expression(expression)
-        return statement
+        return Expression(expression)
+
+    def check_statement(self):
+        if self.match([TokenType.LEFT_CURLY_BRACE]):
+            return Block(self.block())
+
+        return self.expression()
+
+    def block(self):
+        statements = []
+
+        while not self.check(TokenType.RIGHT_CURLY_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_CURLY_BRACE)
+        return statements
 
     def expression(self):
         return self.assignment()

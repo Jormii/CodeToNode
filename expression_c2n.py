@@ -64,6 +64,15 @@ class VariableExpression(VisitorAccepter):
         return visitor.visit_variable_expression(self)
 
 
+class Block(VisitorAccepter):
+
+    def __init__(self, statements):
+        self.statements = statements
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_block(self)
+
+
 class Expression(VisitorAccepter):
 
     def __init__(self, expression):

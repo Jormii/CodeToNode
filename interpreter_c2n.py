@@ -88,6 +88,18 @@ class Interpreter(BaseVisitor):
         log_error(self.filename, expression.token.line,
                   "Error while interpreting the file")
 
+    def visit_block(self, block):
+        self.execute_block(block.statements)
+        return None
+
+    def execute_block(self, statements):
+        self.environment.new_block()
+
+        for statement in statements:
+            self.execute(statement)
+
+        self.environment.end_of_block()
+
     def visit_variable_expression(self, expression):
         token = expression.token
         return self.environment.get(token)

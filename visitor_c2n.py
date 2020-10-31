@@ -21,6 +21,9 @@ class BaseVisitor:
     def visit_variable_expression(self, expression):
         raise NotImplementedError()
 
+    def visit_block(self, block):
+        raise NotImplementedError()
+
     def visit_statement(self, statement):
         raise NotImplementedError()
 
@@ -57,6 +60,11 @@ class ExpressionPrinter(BaseVisitor):
     def visit_variable_expression(self, expression):
         token = expression.token
         return "{}".format(token.lexeme)
+
+    def visit_block(self, block):
+        statements = block.statements
+        for statement in statements:
+            statement.accept_visitor(self)
 
     def visit_statement(self, statement):
         statement_string = statement.expression.accept_visitor(self)
