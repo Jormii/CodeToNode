@@ -1,5 +1,5 @@
-from logger_c2n import log_error
 from callable_c2n import Callable
+from logger_c2n import log_error, ErrorStep
 
 
 class Environment:
@@ -10,35 +10,19 @@ class Environment:
         self.indentation_level = 0
 
     def define(self, name, value):
-        # TODO: Pass token as argument
         is_function = isinstance(value, Callable)
         if self.indentation_level == 0 and not is_function:
             log_error(
-                self.filename, -1, "Error with variable \"{}\". Global variables aren't supported".format(name))
+                self.filename, name.line, ErrorStep.RUNTIME, "Error with variable \"{}\". Global variables aren't supported".format(name))
 
-        self.values[name] = value
-
-    def assign(self, token, value):
-        name = token.lexeme
-        is_function = isinstance(value, Callable)
-
-        if self.indentation_level == 0 and not is_function:
-            log_error(
-                self.filename, token.line, "Error with variable \"{}\". Global variables aren't supported".format(name))
-
-        if name in self.values:
-            self.values[name] = value
-            return
-
-        log_error(self.filename, token.line,
-                  "Undefined variable \"{}\"".format(name))
+        self.values[name.lexeme] = value
 
     def get(self, token):
         name = token.lexeme
         if name in self.values:
             return self.values[name]
 
-        log_error(self.filename, token.line,
+        log_error(self.filename, token.line, ErrorStep.RUNTIME,
                   "Undefined variable \"{}\"".format(name))
 
     def new_block(self):
@@ -50,6 +34,9 @@ class Environment:
             self.clear_non_functions()
 
     def clear_non_functions(self):
+        # Functions are defined in global namespace. When reaching the end of a full block,
+        # non-functions have to be deleted
+
         functions = []
         for key, value in self.values.items():
             if isinstance(value, Callable):

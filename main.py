@@ -1,20 +1,15 @@
 from scanner_c2n import Scanner
 from parser_cn2 import Parser
 from interpreter_c2n import Interpreter
+from token_c2n import TokenType
 
-from token_c2n import *
-from expression_c2n import *
-from visitor_c2n import ExpressionPrinter
+branching = "./Tests/branching.py"
+expression = "./Tests/expression.py"
+diffuse = "./Tests/diffuse.py"  # Its purpose is checking token scanning
+function = "./Tests/function.py"
+while_test = "./Tests/while.py"
 
-import sys
-
-branching = "./tests/branching.py"
-expression = "./tests/expression.py"
-diffuse = "./tests/diffuse.py"  # Its purpose is checking token scanning
-function = "./tests/function.py"
-while_test = "./tests/while.py"
-
-default_file = while_test
+default_file = branching
 
 
 def print_tokens(tokens):
@@ -66,21 +61,11 @@ def scan_tokens(debug=False, filename=default_file):
     return tokens
 
 
-def print_expressions(expressions):
-    visitor = ExpressionPrinter()
-    for expr in expressions:
-        expression_str = expr.accept_visitor(visitor)
-        print(expression_str)
-
-
-def parse_tokens(tokens, filename=default_file, debug=False):
+def parse_tokens(tokens, filename=default_file):
     parser = Parser(filename, tokens)
-    expressions = parser.parse()
+    statements = parser.parse()
 
-    if debug:
-        print_expressions(expressions)
-
-    return expressions
+    return statements
 
 
 def interpret_statements(statements, debug=False, filename=default_file):

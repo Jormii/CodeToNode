@@ -1,9 +1,10 @@
-from token_c2n import TokenType
+class VisitorInterface:
 
+    # Expressions
+    def visit_assigment_expression(self, expression):
+        raise NotImplementedError()
 
-class BaseVisitor:
-
-    def visit_literal_expression(self, expression):
+    def visit_binary_expression(self, expression):
         raise NotImplementedError()
 
     def visit_call_expression(self, expression):
@@ -12,128 +13,42 @@ class BaseVisitor:
     def visit_grouping_expression(self, expression):
         raise NotImplementedError()
 
-    def visit_logical_expression(self, expression):
-        raise NotImplementedError()
-
-    def visit_unary_expression(self, expression):
-        raise NotImplementedError()
-
-    def visit_assigment_expression(self, expression):
-        raise NotImplementedError()
-
-    def visit_binary_expression(self, expression):
-        raise NotImplementedError()
-
-    def visit_variable_expression(self, expression):
-        raise NotImplementedError()
-
-    def visit_block(self, block):
-        raise NotImplementedError()
-
-    def visit_statement(self, statement):
-        raise NotImplementedError()
-
-    def visit_functions(self, statements):
-        raise NotImplementedError()
-
-    def visit_if(self, if_statement):
-        raise NotImplementedError()
-
-    def visit_return(self, statement):
-        raise NotImplementedError()
-
-    def visit_variable_declaration(self, expression):
-        raise NotImplementedError()
-
-    def visit_while(self, expression):
-        raise NotImplementedError()
-
-
-class ExpressionPrinter(BaseVisitor):
-
     def visit_literal_expression(self, expression):
-        return "{}".format(expression.literal)
-
-    def visit_call_expression(self, expression):
-        return "TODO: visit_call_expression"
-
-    def visit_grouping_expression(self, expression):
-        expression_string = expression.expression.accept_visitor(self)
-        return "group({})".format(expression_string)
+        raise NotImplementedError()
 
     def visit_logical_expression(self, expression):
-        left_expression_string = expression.left_expression.accept_visitor(
-            self)
-        token = expression.token
-        right_expression_string = expression.right_expression.accept_visitor(
-            self)
-
-        return "({} {} {})".format(left_expression_string, token.lexeme, right_expression_string)
+        raise NotImplementedError()
 
     def visit_unary_expression(self, expression):
-        expression_string = expression.expression.accept_visitor(self)
-        return "({} {})".format(expression.token.lexeme, expression_string)
-
-    def visit_assigment_expression(self, expression):
-        token = expression.token
-        assigment = expression.expression
-
-        return "{} = {}".format(token.lexeme, assigment.accept_visitor(self))
-
-    def visit_binary_expression(self, expression):
-        left_expression_string = expression.left_expression.accept_visitor(
-            self)
-        right_expression_string = expression.right_expression.accept_visitor(
-            self)
-        return "({} {} {})".format(expression.token.lexeme, left_expression_string, right_expression_string)
+        raise NotImplementedError()
 
     def visit_variable_expression(self, expression):
-        token = expression.token
-        return "{}".format(token.lexeme)
+        raise NotImplementedError()
 
-    def visit_block(self, block):
-        statements = block.statements
-        for statement in statements:
-            statement.accept_visitor(self)
+    # Statements
+    def visit_block_statement(self, statement):
+        raise NotImplementedError()
 
-    def visit_statement(self, statement):
-        statement_string = statement.expression.accept_visitor(self)
-        return "{}".format(statement_string)
+    def visit_expression_statement(self, statement):
+        raise NotImplementedError()
 
-    def visit_function(self, statement):
-        return "TODO: visit_functions"
+    def visit_function_statement(self, statement):
+        raise NotImplementedError()
 
-    def visit_if(self, if_statement):
-        condition_string = if_statement.condition.accept_visitor(self)
-        then_string = if_statement.then_branch.accept_visitor(self)
-        else_string = "" if if_statement.else_branch is None else if_statement.else_branch.accept_visitor(
-            self)
+    def visit_if_statement(self, statement):
+        raise NotImplementedError()
 
-        string = "if ({})".format(condition_string)
-        string += "\n{\n"
-        string += then_string
-        string += "\n}"
+    def visit_return_statement(self, statement):
+        raise NotImplementedError()
 
-        if else_string == "":
-            return string
+    def visit_variable_statement(self, statement):
+        raise NotImplementedError()
 
-        string += "\n{\n"
-        string += else_string
-        string += "\n}"
-        return string
+    def visit_while_statement(self, statement):
+        raise NotImplementedError()
 
-    def visit_return(self, statement):
-        return "TODO: visit_return"
 
-    def visit_variable_declaration(self, expression):
-        token = expression.token
-        declaration = expression.expression
+class VisitorAccepterInterface:
 
-        declaration_str = declaration.accept_visitor(self)
-        return "{} = {}".format(token.lexeme, declaration_str)
-
-    def visit_while(self, expression):
-        condition_string = expression.condition.accept_visitor(self)
-        body_string = expression.condition.accept_visitor(self)
-
-        return "while ({})\n{}".format(condition_string, body_string)
+    def accept_visitor(self, visitor):
+        raise NotImplementedError()

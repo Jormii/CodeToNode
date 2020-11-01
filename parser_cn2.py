@@ -1,8 +1,8 @@
-from token_c2n import *
-from expression_c2n import *
-from logger_c2n import log_error
-
-import sys
+import statement_c2n as stmt
+import expression_c2n as expr
+from token_c2n import TokenType
+from exception_c2n import ParsingException
+from logger_c2n import log_error, ErrorStep
 
 
 class Parser:
@@ -24,24 +24,25 @@ class Parser:
 
     def declaration(self):
         try:
-            # TODO: Problema. Diferenciar entre llamada a variable y asignacion
             if self.match([TokenType.IDENTIFIER]):
-                # Identifiers could be both assignment or function call
-                # If is assignment
+                # Identifiers can be both assignment or function call
+                # If it's assignment
                 if self.check(TokenType.ASSIGMENT):
                     return self.var_declaration()
 
-                # If it's function call
-                self.rollback()  # Undo advance produced by self.match. Continue to self.statement bellow
+                # If it's function call, undo advance produced by self.match. Continue to self.statement below
+                self.rollback()
             elif self.match([TokenType.DEF]):
                 return self.function()
             elif self.match([TokenType.RETURN]):
                 return self.return_statement()
 
             return self.statement()
-        except Exception as e:
+
+        except ParsingException:
             self.synchronize()
-            log_error(self.filename, self.previous().line, "Syntax error")
+            log_error(self.filename, self.previous().line,
+                      ErrorStep.PARSING, "Syntax error")
 
     def var_declaration(self):
         identifier_token = self.previous()
@@ -50,7 +51,7 @@ class Parser:
         initializer = self.expression()
         self.consume(TokenType.SEMICOLON)
 
-        declaration = Variable(identifier_token, initializer)
+        declaration = stmt.Variable(identifier_token, initializer)
         return declaration
 
     def function(self):
@@ -62,7 +63,7 @@ class Parser:
             parameters.append(self.consume(TokenType.IDENTIFIER))
             while self.match([TokenType.COMMA]):
                 if len(parameters) >= Parser.MAX_ARGUMENTS:
-                    log_error(self.filename, name.line, "Can't have more than {} parameters".format(
+                    log_error(self.filename, name.line, ErrorStep.PARSING, "Can't have more than {} parameters".format(
                         Parser.MAX_ARGUMENTS))
                 parameters.append(self.consume(TokenType.IDENTIFIER))
 
@@ -70,7 +71,7 @@ class Parser:
 
         self.consume(TokenType.LEFT_CURLY_BRACE)
         body = self.block()
-        return Function(name, parameters, body)
+        return stmt.Function(name, parameters, body)
 
     def return_statement(self):
         return_token = self.previous()
@@ -80,7 +81,7 @@ class Parser:
             value = self.expression()
 
         self.consume(TokenType.SEMICOLON)
-        return Return(return_token, value)
+        return stmt.Return(return_token, value)
 
     def statement(self):
         if self.match([TokenType.IF]):
@@ -89,7 +90,7 @@ class Parser:
             return self.while_statement()
         elif self.match([TokenType.LEFT_CURLY_BRACE]):
             block = self.block()
-            return Block(block)
+            return stmt.Block(block)
 
         return self.expression_statement()
 
@@ -101,13 +102,13 @@ class Parser:
         if self.match([TokenType.ELSE]):
             else_branch = self.statement()
 
-        return If(condition, then_branch, else_branch)
+        return stmt.If(condition, then_branch, else_branch)
 
     def while_statement(self):
         condition = self.expression()
         body = self.statement()
 
-        return While(condition, body)
+        return stmt.While(condition, body)
 
     def block(self):
         statements = []
@@ -121,7 +122,7 @@ class Parser:
     def expression_statement(self):
         expression = self.expression()
         self.consume(TokenType.SEMICOLON)
-        return Expression(expression)
+        return stmt.Expression(expression)
 
     def expression(self):
         return self.assignment()
@@ -133,11 +134,12 @@ class Parser:
             assigment_token = self.previous()
             value = self.assignment()
 
-            if value is VariableExpression:
+            if isinstance(value, expr.Variable):
                 token = value.token
-                return AssignmentExpression(token, value)
+                return expr.Assignment(token, value)
 
-            log_error(self.filename, assigment_token.line, "Invalid assigment")
+            log_error(self.filename, assigment_token.line,
+                      ErrorStep.PARSING, "Invalid assigment")
 
         return expression
 
@@ -147,7 +149,7 @@ class Parser:
         while self.match([TokenType.OR]):
             operator = self.previous()
             right_expression = self.and_expr()
-            expression = LogicalExpression(
+            expression = expr.Logical(
                 expression, operator, right_expression)
 
         return expression
@@ -158,7 +160,7 @@ class Parser:
         while self.match([TokenType.AND]):
             operator = self.previous()
             right_expression = self.equality()
-            expression = LogicalExpression(
+            expression = expr.Logical(
                 expression, operator, right_expression)
 
         return expression
@@ -169,7 +171,7 @@ class Parser:
         while self.match([TokenType.EQUAL, TokenType.NOT_EQUAL]):
             operator = self.previous()
             right_expression = self.comparison()
-            expression = BinaryExpression(
+            expression = expr.Binary(
                 expression, operator, right_expression)
 
         return expression
@@ -181,7 +183,7 @@ class Parser:
                           TokenType.LESS_THAN, TokenType.LESS_OR_EQUAL]):
             operator = self.previous()
             right_expression = self.term()
-            expression = BinaryExpression(
+            expression = expr.Binary(
                 expression, operator, right_expression)
 
         return expression
@@ -192,7 +194,7 @@ class Parser:
         while self.match([TokenType.ADD, TokenType.SUBSTRACT]):
             operator = self.previous()
             right_expression = self.factor()
-            expression = BinaryExpression(
+            expression = expr.Binary(
                 expression, operator, right_expression)
 
         return expression
@@ -204,7 +206,7 @@ class Parser:
                           TokenType.FLOOR_DIVISION, TokenType.MODULUS]):
             operator = self.previous()
             right_expression = self.power()
-            expression = BinaryExpression(
+            expression = expr.Binary(
                 expression, operator, right_expression)
 
         return expression
@@ -215,7 +217,7 @@ class Parser:
         while self.match([TokenType.POWER]):
             operator = self.previous()
             right_expression = self.unary()
-            expression = BinaryExpression(
+            expression = expr.Binary(
                 expression, operator, right_expression)
 
         return expression
@@ -224,7 +226,7 @@ class Parser:
         if self.match([TokenType.NOT, TokenType.SUBSTRACT]):
             operator = self.previous()
             right_expression = self.unary()
-            return UnaryExpression(operator, right_expression)
+            return expr.Unary(operator, right_expression)
 
         return self.call()
 
@@ -245,37 +247,38 @@ class Parser:
             arguments.append(self.expression())
             while self.match([TokenType.COMMA]):
                 if len(arguments) >= Parser.MAX_ARGUMENTS:
-                    log_error(self.filename, -1,
+                    log_error(self.filename, -1, ErrorStep.PARSING,
                               "Can't have more than {} arguments".format(Parser.MAX_ARGUMENTS))
 
                 arguments.append(self.expression())
 
-        right_parenthesis_token = self.consume(TokenType.RIGHT_PARENTHESIS)
+        line = self.consume(TokenType.RIGHT_PARENTHESIS).line
 
-        return CallExpression(callee, right_parenthesis_token, arguments)
+        return expr.Call(callee, arguments, line)
 
     def primary(self):
         if self.match([TokenType.TRUE]):
-            return LiteralExpression(True)
+            return expr.Literal(True)
         if self.match([TokenType.FALSE]):
-            return LiteralExpression(False)
+            return expr.Literal(False)
         if self.match([TokenType.NONE]):
-            return LiteralExpression(None)
+            return expr.Literal(None)
 
         if self.match([TokenType.IDENTIFIER]):
             token = self.previous()
-            return VariableExpression(token)
+            return expr.Variable(token)
         if self.match([TokenType.NUMBER]):
             literal = self.previous().literal
-            return LiteralExpression(literal)
+            return expr.Literal(literal)
 
         if self.match([TokenType.LEFT_PARENTHESIS]):
             expression = self.expression()
             self.consume(TokenType.RIGHT_PARENTHESIS)
-            return GroupingExpression(expression)
+            return expr.Grouping(expression)
 
         token = self.tokens[self.current]
-        raise Exception("Expected expression. Last token: {}".format(token))
+        raise ParsingException(
+            "Expected expression. Last token: {}".format(token))
 
     def rollback(self):
         self.current -= 1
@@ -313,7 +316,7 @@ class Parser:
         if self.check(token_type):
             return self.advance()
 
-        raise Exception(
+        raise ParsingException(
             "Error parsing: Expecting \"{}\"".format(token_type.name))
 
     def synchronize(self):

@@ -7,14 +7,14 @@ class TokenType(Enum):
     ELSE = auto()
     TRUE = auto()
     FALSE = auto()
-    WHILE = auto()
+    WHILE = auto()  # Although while is implemented in the transpiler, it's not supported in terms of Blender nodes yet
     NONE = auto()
     AND = auto()
     OR = auto()
     NOT = auto()
     DEF = auto()
     RETURN = auto()
-    FROM = auto()
+    FROM = auto()       # Although from and import are recognized, these are ignored. Therefore, importing isn't allowed
     IMPORT = auto()
 
     # Arithmetic operators
@@ -42,50 +42,54 @@ class TokenType(Enum):
     RIGHT_PARENTHESIS = auto()
     DOT = auto()
     COMMA = auto()
-    LEFT_CURLY_BRACE = auto()
-    RIGHT_CURLY_BRACE = auto()
+    LEFT_CURLY_BRACE = auto()       # {} aren't Python symbols but the scanner
+    RIGHT_CURLY_BRACE = auto()      # adds these tokens to ease the parsing later
 
     # Literals
     IDENTIFIER = auto()
     NUMBER = auto()
 
     # Other
-    SEMICOLON = auto()
+    SEMICOLON = auto()              # Same reason as {}
     EOF = auto()
 
     # TODO: Not yet supported
-    # ELIF = 104
+    # ELIF = auto()
 
-    # TODO: Consider
-    # BITWISE_AND = 30
-    # BITWISE_OR = 31
-    # BITWISE_NOT = 32
-    # BITSISE_XOR = 33
-    # BITWISE_RIGHT_SHIFT = 34
-    # BITWISE_LEFT_SHIFT = 35
-    # ASSIGMENT_ADD = 41
-    # ASSIGMENT_SUBSTRACT = 42
-    # ASSIGMENT_PRODUCT = 43
-    # ASSIGMENT_DIVISION = 44
-    # ASSIGMENT_MODULUS = 45
-    # ASSIGMENT_FLOOR_DIVISION = 46
-    # ASSIGMENT_POWER = 47
-    # ASSIGMENT_BITWISE_AND = 48
-    # ASSIGMENT_BITWISE_OR = 49
-    # ASSIGMENT_BITWISE_XOR = 50
-    # ASSIGMENT_BITWISE_RIGHT_SHIFT = 51
-    # ASSIGMENT_BITWISE_LEFT_SHIFT = 52
-    # IS = 60
-    # IS_NOT = 61
-    # IN = 70
-    # NOT_IN = 71
-    # LEFT_BOX_BRACKET = 82
-    # RIGHT_BOX_BRACKET = 83
-    # STRING = 91
-    # BREAK = 107
-    # GLOBAL = 114
-    # CONTINUE = 109
-    # FOR = 110
+    # TODO: Consider the following
+    # BITWISE_AND = auto()
+    # BITWISE_OR = auto()
+    # BITWISE_NOT = auto()
+    # BITSISE_XOR = auto()
+    # BITWISE_RIGHT_SHIFT = auto()
+    # BITWISE_LEFT_SHIFT = auto()
+
+    # ASSIGMENT_ADD = auto()
+    # ASSIGMENT_SUBSTRACT = auto()
+    # ASSIGMENT_PRODUCT = auto()
+    # ASSIGMENT_DIVISION = auto()
+    # ASSIGMENT_MODULUS = auto()
+    # ASSIGMENT_FLOOR_DIVISION = auto()
+    # ASSIGMENT_POWER = auto()
+    # ASSIGMENT_BITWISE_AND = auto()
+    # ASSIGMENT_BITWISE_OR = auto()
+    # ASSIGMENT_BITWISE_XOR = auto()
+    # ASSIGMENT_BITWISE_RIGHT_SHIFT = auto()
+    # ASSIGMENT_BITWISE_LEFT_SHIFT = auto()
+
+    # IN = auto()
+    # LEFT_BOX_BRACKET = auto()
+    # RIGHT_BOX_BRACKET = auto()
+
+    # GLOBAL = auto()
+    # STRING = auto()
+
+    # FOR = auto()
+    # BREAK = auto()
+    # CONTINUE = auto()
+
+    # Keywords that won't be added:
+    # is
 
 
 class Token:

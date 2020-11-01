@@ -1,13 +1,14 @@
-from logger_c2n import log_error
-from token_c2n import Token, TokenType
-
 import sys
 import keyword
 import numpy as np
 
+from token_c2n import Token, TokenType
+from logger_c2n import log_error, ErrorStep
+
 
 class Scanner:
 
+    # Keywords supported and their token types
     keywords = {
         "if": TokenType.IF,
         "else": TokenType.ELSE,
@@ -78,13 +79,11 @@ class Scanner:
         modulo = indentations_np % minimum
         for i in range(len(modulo)):
             if modulo[i] != 0:
-                log_error(self.filename, i, "Indentation error")
+                log_error(self.filename, i, ErrorStep.SCANNING,
+                          "Indentation error")
 
         tabs = indentations_np // minimum
         self.indentations = tabs.tolist()
-
-    def is_at_end(self):
-        return self.current >= len(self.source)
 
     def scan_token(self):
         c = self.advance()
@@ -129,7 +128,7 @@ class Scanner:
         elif c == "!":
             next_is_equal = self.next_matches("=")
             if not next_is_equal:
-                log_error(self.filename, self.line,
+                log_error(self.filename, self.line, ErrorStep.SCANNING,
                           "! character doesn't precede =")
 
             self.add_token(TokenType.NOT_EQUAL)
@@ -154,8 +153,11 @@ class Scanner:
         elif self.is_alphabetic(c):
             self.scan_identifier()
         else:
-            log_error(self.filename, self.line,
+            log_error(self.filename, self.line, ErrorStep.SCANNING,
                       "Unexpected character \"{}\"".format(c))
+
+    def is_at_end(self):
+        return self.current >= len(self.source)
 
     def peek(self):
         if self.is_at_end():
@@ -204,7 +206,7 @@ class Scanner:
         identifier = self.source[self.start:self.current]
 
         if identifier in Scanner.unsupported_keywords:
-            log_error(self.filename, self.line,
+            log_error(self.filename, self.line, ErrorStep.SCANNING,
                       "Found unsupported keyword \"{}\"".format(identifier))
 
         token_type = TokenType.IDENTIFIER if identifier not in Scanner.keywords else Scanner.keywords[
@@ -247,6 +249,14 @@ class Scanner:
 
         return None
 
+    def add_right_curly_brace(self, line):
+        token = Token(TokenType.RIGHT_CURLY_BRACE, line, "}")
+        for i in range(len(self.tokens) - 1, -1, -1):
+            token_i = self.tokens[i]
+            if token_i.line == line:
+                self.tokens.insert(i + 1, token)
+                return
+
     def add_final_right_curly_braces(self):
         if len(self.tokens) == 0:
             return
@@ -255,14 +265,6 @@ class Scanner:
         previous_indentation_level = self.indentations[last_token_line - 1]
         for i in range(previous_indentation_level):
             self.add_right_curly_brace(last_token_line)
-
-    def add_right_curly_brace(self, line):
-        token = Token(TokenType.RIGHT_CURLY_BRACE, line, "}")
-        for i in range(len(self.tokens) - 1, -1, -1):
-            token_i = self.tokens[i]
-            if token_i.line == line:
-                self.tokens.insert(i + 1, token)
-                return
 
     def check_for_semicolon(self):
         if len(self.tokens) == 0:

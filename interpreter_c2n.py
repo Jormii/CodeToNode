@@ -1,12 +1,12 @@
-from visitor_c2n import BaseVisitor
 from environment_c2n import Environment
-from logger_c2n import log_error
 from token_c2n import TokenType
-from callable_c2n import *
-from exceptions_c2n import ReturnException
+from callable_c2n import Callable, CustomFunction
+from visitor_c2n import VisitorInterface
+from exception_c2n import ReturnException
+from logger_c2n import log_error, ErrorStep
 
 
-class Interpreter(BaseVisitor):
+class Interpreter(VisitorInterface):
 
     def __init__(self, filename, debug=False):
         self.environment = Environment(filename)
@@ -17,7 +17,7 @@ class Interpreter(BaseVisitor):
         self.initialize_native_functions()
 
     def initialize_native_functions(self):
-        self.environment.define("clock", ClockCall())
+        return
 
     def interpret(self, statements):
         for statement in statements:
@@ -26,60 +26,27 @@ class Interpreter(BaseVisitor):
     def execute(self, statement):
         statement.accept_visitor(self)
 
-    def visit_literal_expression(self, expression):
-        return expression.literal
+    def evaluate(self, expression):
+        return expression.accept_visitor(self)
 
-    def visit_call_expression(self, expression):
-        line = expression.right_parenthesis_token.line
-        function = self.evaluate(expression.callee)
-        if not isinstance(function, Callable):
-            log_error(self.filename, line,
-                      "Trying to call a not callable instance")
+    def is_truthy(self, value):
+        if value is None:
+            return False
 
-        arguments = []
-        for arg in expression.arguments:
-            arguments.append(self.evaluate(arg))
+        if isinstance(value, bool):
+            return value
 
-        if len(arguments) != function.arity():
-            log_error(self.filename, line, "Expected {} arguments but got {} instead".format(
-                function.arity(), len(arguments)))
+        return value == 0
 
-        return function.call(self, arguments)
-
-    def visit_grouping_expression(self, expression):
-        return self.evaluate(expression.expression)
-
-    def visit_logical_expression(self, expression):
-        left = self.evaluate(expression.left_expression)
-        operator_type = expression.token.token_type
-
-        if operator_type == TokenType.OR:
-            if self.is_truthy(left):
-                return left
-        else:
-            if not self.is_truthy(left):
-                return left
-
-        return self.evaluate(expression.right_expression)
-
-    def visit_unary_expression(self, expression):
-        value = self.evaluate(expression.expression)
-
-        token_type = expression.token.token_type
-        if token_type == TokenType.SUBSTRACT:
-            return -value
-        if token_type == TokenType.NOT:
-            return not self.is_truthy(value)
-
-        # Shouldn't reach this point
-        log_error(self.filename, expression.token.line,
-                  "Error while interpreting the file")
+    ###
+    # VisitorInterface
+    ###
 
     def visit_assigment_expression(self, expression):
         token = expression.token
         value = self.evaluate(expression.expression)
 
-        self.environment.assign(token, value)
+        self.environment.define(token, value)
 
         if self.debug:
             token = expression.token
@@ -89,10 +56,10 @@ class Interpreter(BaseVisitor):
         return value
 
     def visit_binary_expression(self, expression):
-        left_value = self.evaluate(expression.left_expression)
-        right_value = self.evaluate(expression.right_expression)
+        left_value = self.evaluate(expression.left)
+        right_value = self.evaluate(expression.right)
 
-        token_type = expression.token.token_type
+        token_type = expression.operator.token_type
         if token_type == TokenType.ADD:
             return left_value + right_value
         if token_type == TokenType.SUBSTRACT:
@@ -122,12 +89,66 @@ class Interpreter(BaseVisitor):
             return left_value <= right_value
 
         # Shouldn't reach this point
-        log_error(self.filename, expression.token.line,
+        log_error(self.filename, expression.token.line, ErrorStep.RUNTIME,
                   "Error while interpreting the file")
-
-    def visit_block(self, block):
-        self.execute_block(block.statements)
         return None
+
+    def visit_call_expression(self, expression):
+        line = expression.line
+        function = self.evaluate(expression.callee)
+        if not isinstance(function, Callable):
+            log_error(self.filename, line, ErrorStep.RUNTIME,
+                      "Trying to call a not callable instance")
+
+        arguments = []
+        for arg in expression.arguments:
+            arguments.append(self.evaluate(arg))
+
+        if len(arguments) != function.arity():
+            log_error(self.filename, line, ErrorStep.RUNTIME,
+                      "Expected {} arguments but got {} instead".format(function.arity(), len(arguments)))
+
+        return function.call(self, arguments)
+
+    def visit_grouping_expression(self, expression):
+        return self.evaluate(expression.expression)
+
+    def visit_literal_expression(self, expression):
+        return expression.literal
+
+    def visit_logical_expression(self, expression):
+        left = self.evaluate(expression.left)
+        operator_type = expression.operator.token_type
+
+        if operator_type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(expression.right)
+
+    def visit_unary_expression(self, expression):
+        value = self.evaluate(expression.right)
+
+        token_type = expression.operator.token_type
+        if token_type == TokenType.SUBSTRACT:
+            return -value
+        if token_type == TokenType.NOT:
+            return not self.is_truthy(value)
+
+        # Shouldn't reach this point
+        log_error(self.filename, expression.operator.line, ErrorStep.RUNTIME,
+                  "Error while interpreting the file")
+        return None
+
+    def visit_variable_expression(self, expression):
+        token = expression.name
+        return self.environment.get(token)
+
+    def visit_block_statement(self, statement):
+        self.execute_block(statement.statements)
 
     def execute_block(self, statements):
         self.environment.new_block()
@@ -137,41 +158,21 @@ class Interpreter(BaseVisitor):
 
         self.environment.end_of_block()
 
-    def visit_variable_expression(self, expression):
-        token = expression.token
-        return self.environment.get(token)
-
-    def visit_statement(self, statement):
+    def visit_expression_statement(self, statement):
         self.evaluate(statement.expression)
-        return None
 
-    def evaluate(self, expression):
-        return expression.accept_visitor(self)
-
-    def is_truthy(self, value):
-        if value is None:
-            return False
-
-        if isinstance(value, bool):
-            return value
-
-        return value == 0
-
-    def visit_function(self, statement):
+    def visit_function_statement(self, statement):
         function = CustomFunction(statement)
-        self.environment.define(statement.name.lexeme, function)
-        return None
+        self.environment.define(statement.name, function)
 
-    def visit_if(self, if_statement):
-        condition = if_statement.condition
+    def visit_if_statement(self, statement):
+        condition = statement.condition
         if self.is_truthy(self.evaluate(condition)):
-            self.execute(if_statement.then_branch)
-        elif if_statement.else_branch is not None:
-            self.execute(if_statement.else_branch)
+            self.execute(statement.then_branch)
+        elif statement.else_branch is not None:
+            self.execute(statement.else_branch)
 
-        return None
-
-    def visit_return(self, statement):
+    def visit_return_statement(self, statement):
         value = None
 
         if statement.value is not None:
@@ -179,26 +180,21 @@ class Interpreter(BaseVisitor):
 
         raise ReturnException(value)
 
-    def visit_variable_declaration(self, expression):
-        initializer = expression.expression
+    def visit_variable_statement(self, statement):
+        initializer = statement.initializer
 
-        name = expression.token.lexeme
+        token = statement.name
         value = self.evaluate(initializer)
 
-        self.environment.define(name, value)
+        self.environment.define(token, value)
 
         if self.debug:
-            token = expression.token
             token_str = "{} (line {})".format(token.lexeme, token.line)
             print("{} = {}".format(token_str, value))
 
-        return None
-
-    def visit_while(self, expression):
-        condition = expression.condition
-        body = expression.body
+    def visit_while_statement(self, statement):
+        condition = statement.condition
+        body = statement.body
 
         while self.is_truthy(self.evaluate(condition)):
             self.execute(body)
-
-        return None
