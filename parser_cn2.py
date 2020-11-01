@@ -33,9 +33,10 @@ class Parser:
 
                 # If it's function call
                 self.rollback()  # Undo advance produced by self.match. Continue to self.statement bellow
-
-            if self.match([TokenType.DEF]):
+            elif self.match([TokenType.DEF]):
                 return self.function()
+            elif self.match([TokenType.RETURN]):
+                return self.return_statement()
 
             return self.statement()
         except Exception as e:
@@ -70,6 +71,16 @@ class Parser:
         self.consume(TokenType.LEFT_CURLY_BRACE)
         body = self.block()
         return Function(name, parameters, body)
+
+    def return_statement(self):
+        return_token = self.previous()
+
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON)
+        return Return(return_token, value)
 
     def statement(self):
         if self.match([TokenType.IF]):

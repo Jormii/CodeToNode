@@ -3,6 +3,7 @@ from environment_c2n import Environment
 from logger_c2n import log_error
 from token_c2n import TokenType
 from callable_c2n import *
+from exceptions_c2n import ReturnException
 
 
 class Interpreter(BaseVisitor):
@@ -169,6 +170,14 @@ class Interpreter(BaseVisitor):
             self.execute(if_statement.else_branch)
 
         return None
+
+    def visit_return(self, statement):
+        value = None
+
+        if statement.value is not None:
+            value = self.evaluate(statement.value)
+
+        raise ReturnException(value)
 
     def visit_variable_declaration(self, expression):
         initializer = expression.expression

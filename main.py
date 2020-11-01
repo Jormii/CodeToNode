@@ -14,7 +14,7 @@ diffuse = "./tests/diffuse.py"  # Its purpose is checking token scanning
 function = "./tests/function.py"
 while_test = "./tests/while.py"
 
-default_file = function
+default_file = while_test
 
 
 def print_tokens(tokens):

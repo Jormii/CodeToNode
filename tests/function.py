@@ -23,8 +23,21 @@ def is_odd(n):
         is_even(n - 1)
 
 
+def fib(n):
+    def otro(m):
+        n = m
+
+    if n <= 1:
+        otro(n)
+        return n
+
+    return fib(n - 2) + fib(n - 1)
+
+
 :
     p = 6
+
+    f = fib(6)
 
     add(1, 2)
     count(p)

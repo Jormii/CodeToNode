@@ -1,4 +1,5 @@
 import time
+from exceptions_c2n import ReturnException
 
 
 class Callable:
@@ -28,10 +29,16 @@ class CustomFunction(Callable):
 
             new_environment.define(parameter.lexeme, argument)
 
-        interpreter.environment = new_environment
-        interpreter.execute_block(self.declaration.body)
-        interpreter.environment = previous_environment
-        return None
+        value_to_return = None
+        try:
+            interpreter.environment = new_environment
+            interpreter.execute_block(self.declaration.body)
+        except ReturnException as e:
+            value_to_return = e.value
+        finally:
+            interpreter.environment = previous_environment
+
+        return value_to_return
 
 
 class ClockCall(Callable):

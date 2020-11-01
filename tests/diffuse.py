@@ -14,7 +14,7 @@ def main():
 
     diffuse_mat = DiffuseBSDF(color, roughness, None)
 
-    return diffuse_mat, None, None
+    return Output(diffuse_mat, None, None)
 
 
 def other(x):
@@ -22,3 +22,6 @@ def other(x):
         a = 3
     else:
         a = 5
+
+
+main()

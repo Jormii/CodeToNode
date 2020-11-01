@@ -126,6 +126,16 @@ class If(VisitorAccepter):
         return visitor.visit_if(self)
 
 
+class Return(VisitorAccepter):
+
+    def __init__(self, return_token, value):
+        self.return_token = return_token
+        self.value = value
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_return(self)
+
+
 class Variable(VisitorAccepter):
 
     # <identifier_token> = <expression>

@@ -39,6 +39,9 @@ class BaseVisitor:
     def visit_if(self, if_statement):
         raise NotImplementedError()
 
+    def visit_return(self, statement):
+        raise NotImplementedError()
+
     def visit_variable_declaration(self, expression):
         raise NotImplementedError()
 
@@ -118,6 +121,9 @@ class ExpressionPrinter(BaseVisitor):
         string += else_string
         string += "\n}"
         return string
+
+    def visit_return(self, statement):
+        return "TODO: visit_return"
 
     def visit_variable_declaration(self, expression):
         token = expression.token
