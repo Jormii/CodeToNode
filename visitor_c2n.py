@@ -6,6 +6,9 @@ class BaseVisitor:
     def visit_literal_expression(self, expression):
         raise NotImplementedError()
 
+    def visit_call_expression(self, expression):
+        raise NotImplementedError()
+
     def visit_grouping_expression(self, expression):
         raise NotImplementedError()
 
@@ -30,6 +33,9 @@ class BaseVisitor:
     def visit_statement(self, statement):
         raise NotImplementedError()
 
+    def visit_functions(self, statements):
+        raise NotImplementedError()
+
     def visit_if(self, if_statement):
         raise NotImplementedError()
 
@@ -44,6 +50,9 @@ class ExpressionPrinter(BaseVisitor):
 
     def visit_literal_expression(self, expression):
         return "{}".format(expression.literal)
+
+    def visit_call_expression(self, expression):
+        return "TODO: visit_call_expression"
 
     def visit_grouping_expression(self, expression):
         expression_string = expression.expression.accept_visitor(self)
@@ -87,6 +96,9 @@ class ExpressionPrinter(BaseVisitor):
     def visit_statement(self, statement):
         statement_string = statement.expression.accept_visitor(self)
         return "{}".format(statement_string)
+
+    def visit_function(self, statement):
+        return "TODO: visit_functions"
 
     def visit_if(self, if_statement):
         condition_string = if_statement.condition.accept_visitor(self)

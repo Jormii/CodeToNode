@@ -13,6 +13,17 @@ class LiteralExpression(VisitorAccepter):
         return visitor.visit_literal_expression(self)
 
 
+class CallExpression(VisitorAccepter):
+
+    def __init__(self, callee, right_parenthesis_token, arguments):
+        self.callee = callee
+        self.right_parenthesis_token = right_parenthesis_token
+        self.arguments = arguments
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_call_expression(self)
+
+
 class GroupingExpression(VisitorAccepter):
 
     def __init__(self, expression):
@@ -91,6 +102,17 @@ class Expression(VisitorAccepter):
 
     def accept_visitor(self, visitor):
         return visitor.visit_statement(self)
+
+
+class Function(VisitorAccepter):
+
+    def __init__(self, name, parameters, body):
+        self.name = name
+        self.parameters = parameters
+        self.body = body
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_function(self)
 
 
 class If(VisitorAccepter):

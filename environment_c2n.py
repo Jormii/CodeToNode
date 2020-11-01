@@ -1,4 +1,5 @@
 from logger_c2n import log_error
+from callable_c2n import Callable
 
 
 class Environment:
@@ -10,7 +11,8 @@ class Environment:
 
     def define(self, name, value):
         # TODO: Pass token as argument
-        if self.indentation_level == 0:
+        is_function = isinstance(value, Callable)
+        if self.indentation_level == 0 and not is_function:
             log_error(
                 self.filename, -1, "Error with variable \"{}\". Global variables aren't supported".format(name))
 
@@ -18,8 +20,9 @@ class Environment:
 
     def assign(self, token, value):
         name = token.lexeme
+        is_function = isinstance(value, Callable)
 
-        if self.indentation_level == 0:
+        if self.indentation_level == 0 and not is_function:
             log_error(
                 self.filename, token.line, "Error with variable \"{}\". Global variables aren't supported".format(name))
 
@@ -44,4 +47,25 @@ class Environment:
     def end_of_block(self):
         self.indentation_level -= 1
         if self.indentation_level == 0:
-            self.values.clear()
+            self.clear_non_functions()
+
+    def clear_non_functions(self):
+        functions = []
+        for key, value in self.values.items():
+            if isinstance(value, Callable):
+                functions.append((key, value))
+
+        self.values.clear()
+        for func in functions:
+            key = func[0]
+            value = func[1]
+            self.values[key] = value
+
+    def copy(self):
+        copy = Environment(self.filename)
+        copy.values = self.values.copy()
+        copy.indentation_level = self.indentation_level
+
+        copy.clear_non_functions()
+
+        return copy

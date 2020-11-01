@@ -10,10 +10,11 @@ import sys
 
 branching = "./tests/branching.py"
 expression = "./tests/expression.py"
-diffuse = "./tests/diffuse.py"
+diffuse = "./tests/diffuse.py"  # Its purpose is checking token scanning
+function = "./tests/function.py"
 while_test = "./tests/while.py"
 
-default_file = while_test
+default_file = function
 
 
 def print_tokens(tokens):

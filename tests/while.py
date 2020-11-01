@@ -1,6 +1,6 @@
 :
     counter = 2
-    number = 5
+    number = 49
     prime = True
     while prime and counter != number:
         if number % counter == 0:

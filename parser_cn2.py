@@ -7,6 +7,8 @@ import sys
 
 class Parser:
 
+    MAX_ARGUMENTS = 255
+
     def __init__(self, filename, tokens):
         self.filename = filename
         self.tokens = tokens
@@ -22,8 +24,18 @@ class Parser:
 
     def declaration(self):
         try:
+            # TODO: Problema. Diferenciar entre llamada a variable y asignacion
             if self.match([TokenType.IDENTIFIER]):
-                return self.var_declaration()
+                # Identifiers could be both assignment or function call
+                # If is assignment
+                if self.check(TokenType.ASSIGMENT):
+                    return self.var_declaration()
+
+                # If it's function call
+                self.rollback()  # Undo advance produced by self.match. Continue to self.statement bellow
+
+            if self.match([TokenType.DEF]):
+                return self.function()
 
             return self.statement()
         except Exception as e:
@@ -39,6 +51,25 @@ class Parser:
 
         declaration = Variable(identifier_token, initializer)
         return declaration
+
+    def function(self):
+        name = self.consume(TokenType.IDENTIFIER)
+        self.consume(TokenType.LEFT_PARENTHESIS)
+
+        parameters = []
+        if not self.check(TokenType.RIGHT_PARENTHESIS):
+            parameters.append(self.consume(TokenType.IDENTIFIER))
+            while self.match([TokenType.COMMA]):
+                if len(parameters) >= Parser.MAX_ARGUMENTS:
+                    log_error(self.filename, name.line, "Can't have more than {} parameters".format(
+                        Parser.MAX_ARGUMENTS))
+                parameters.append(self.consume(TokenType.IDENTIFIER))
+
+        self.consume(TokenType.RIGHT_PARENTHESIS)
+
+        self.consume(TokenType.LEFT_CURLY_BRACE)
+        body = self.block()
+        return Function(name, parameters, body)
 
     def statement(self):
         if self.match([TokenType.IF]):
@@ -184,7 +215,33 @@ class Parser:
             right_expression = self.unary()
             return UnaryExpression(operator, right_expression)
 
-        return self.primary()
+        return self.call()
+
+    def call(self):
+        expression = self.primary()
+
+        while True:
+            if self.match([TokenType.LEFT_PARENTHESIS]):
+                expression = self.finish_call(expression)
+            else:
+                break
+
+        return expression
+
+    def finish_call(self, callee):
+        arguments = []
+        if not self.check(TokenType.RIGHT_PARENTHESIS):
+            arguments.append(self.expression())
+            while self.match([TokenType.COMMA]):
+                if len(arguments) >= Parser.MAX_ARGUMENTS:
+                    log_error(self.filename, -1,
+                              "Can't have more than {} arguments".format(Parser.MAX_ARGUMENTS))
+
+                arguments.append(self.expression())
+
+        right_parenthesis_token = self.consume(TokenType.RIGHT_PARENTHESIS)
+
+        return CallExpression(callee, right_parenthesis_token, arguments)
 
     def primary(self):
         if self.match([TokenType.TRUE]):
@@ -208,6 +265,9 @@ class Parser:
 
         token = self.tokens[self.current]
         raise Exception("Expected expression. Last token: {}".format(token))
+
+    def rollback(self):
+        self.current -= 1
 
     def peek(self):
         return self.tokens[self.current]

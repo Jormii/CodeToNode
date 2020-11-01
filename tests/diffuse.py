@@ -2,7 +2,7 @@ from structures_c2n import *
 
 
 def main():
-    color = (1, 2, 3, 4)
+    color = RGBA(1, 2, 3, 4)
     roughness = 5
 
     def m(a, b, c, d):

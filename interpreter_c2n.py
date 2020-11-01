@@ -2,6 +2,7 @@ from visitor_c2n import BaseVisitor
 from environment_c2n import Environment
 from logger_c2n import log_error
 from token_c2n import TokenType
+from callable_c2n import *
 
 
 class Interpreter(BaseVisitor):
@@ -12,6 +13,11 @@ class Interpreter(BaseVisitor):
         self.filename = filename
         self.debug = debug
 
+        self.initialize_native_functions()
+
+    def initialize_native_functions(self):
+        self.environment.define("clock", ClockCall())
+
     def interpret(self, statements):
         for statement in statements:
             self.execute(statement)
@@ -21,6 +27,23 @@ class Interpreter(BaseVisitor):
 
     def visit_literal_expression(self, expression):
         return expression.literal
+
+    def visit_call_expression(self, expression):
+        line = expression.right_parenthesis_token.line
+        function = self.evaluate(expression.callee)
+        if not isinstance(function, Callable):
+            log_error(self.filename, line,
+                      "Trying to call a not callable instance")
+
+        arguments = []
+        for arg in expression.arguments:
+            arguments.append(self.evaluate(arg))
+
+        if len(arguments) != function.arity():
+            log_error(self.filename, line, "Expected {} arguments but got {} instead".format(
+                function.arity(), len(arguments)))
+
+        return function.call(self, arguments)
 
     def visit_grouping_expression(self, expression):
         return self.evaluate(expression.expression)
@@ -132,6 +155,11 @@ class Interpreter(BaseVisitor):
             return value
 
         return value == 0
+
+    def visit_function(self, statement):
+        function = CustomFunction(statement)
+        self.environment.define(statement.name.lexeme, function)
+        return None
 
     def visit_if(self, if_statement):
         condition = if_statement.condition
