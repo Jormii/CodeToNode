@@ -23,7 +23,7 @@ def fib(n):
     return 0
 
 
-:
+def main():
     p = 6
 
     f = fib(6)
@@ -33,3 +33,4 @@ def fib(n):
     is_even(p)
 
     p = p + 0
+    return 0

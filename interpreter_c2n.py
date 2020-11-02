@@ -1,6 +1,6 @@
 import statement_c2n as stmt
 from environment_c2n import Environment
-from token_c2n import TokenType
+from token_c2n import Token, TokenType
 from callable_c2n import Callable, CustomFunction
 from visitor_c2n import VisitorInterface
 from exception_c2n import ReturnException
@@ -25,6 +25,16 @@ class Interpreter(VisitorInterface):
 
         for statement in statements:
             self.execute(statement)
+
+        # Ugly, but needed
+        virtual_main_token = Token(TokenType.IDENTIFIER, -1, "main")
+        main_func = self.environment.get(virtual_main_token)
+        if main_func.arity() != 0:
+            log_error(self.filename, main_func.declaration.name.line,
+                      ErrorStep.RUNTIME, "\"main\" must have no parameters")
+
+        exit_code = main_func.call(self, [])
+        print("END OF EXECUTION: Value returned from \"main\":", exit_code)
 
     def check_unsupported_actions(self, statements):
         self.check_for_single_return(statements)
