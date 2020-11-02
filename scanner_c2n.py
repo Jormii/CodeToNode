@@ -91,12 +91,14 @@ class Scanner:
         if c in " \t\r":
             return
         if c == "\n":
-            if self.found_character:
-                self.check_for_right_curly_braces()
-                self.found_character = False
             self.check_for_semicolon()
             self.line += 1
+            self.found_character = False
             return
+
+        # If it's the first character found in the line, check for potential "}"s
+        if not self.found_character:
+            self.check_for_right_curly_braces()
 
         self.found_character = True
 
@@ -228,34 +230,22 @@ class Scanner:
         self.tokens.append(Token(TokenType.LEFT_CURLY_BRACE, self.line, "{"))
 
     def check_for_right_curly_braces(self):
-        previous_token = self.find_previous_token()
-        if previous_token is None:
+        if len(self.tokens) == 0:
             return
 
-        last_token_line = previous_token.line
-        previous_indentation_level = self.indentations[last_token_line - 1]
-        this_line_indentation_level = self.indentations[self.line - 1]
+        previous_token = self.tokens[-1]
 
-        if this_line_indentation_level < previous_indentation_level:
-            difference = previous_indentation_level - this_line_indentation_level
+        previous_token_line = previous_token.line
+        this_line = self.line
+
+        previous_line_indentation_level = self.indentations[previous_token_line - 1]
+        this_line_indentation_level = self.indentations[this_line - 1]
+        if this_line_indentation_level < previous_line_indentation_level:
+            difference = previous_line_indentation_level - this_line_indentation_level
             for i in range(difference):
-                self.add_right_curly_brace(last_token_line)
-
-    def find_previous_token(self):
-        for i in range(len(self.tokens) - 1, -1, -1):
-            token_i = self.tokens[i]
-            if token_i.line < self.line:
-                return token_i
-
-        return None
-
-    def add_right_curly_brace(self, line):
-        token = Token(TokenType.RIGHT_CURLY_BRACE, line, "}")
-        for i in range(len(self.tokens) - 1, -1, -1):
-            token_i = self.tokens[i]
-            if token_i.line == line:
-                self.tokens.insert(i + 1, token)
-                return
+                token = Token(TokenType.RIGHT_CURLY_BRACE,
+                              previous_token_line, "}")
+                self.tokens.append(token)
 
     def add_final_right_curly_braces(self):
         if len(self.tokens) == 0:
@@ -264,7 +254,8 @@ class Scanner:
         last_token_line = self.tokens[-1].line
         previous_indentation_level = self.indentations[last_token_line - 1]
         for i in range(previous_indentation_level):
-            self.add_right_curly_brace(last_token_line)
+            token = Token(TokenType.RIGHT_CURLY_BRACE, last_token_line, "}")
+            self.tokens.append(token)
 
     def check_for_semicolon(self):
         if len(self.tokens) == 0:

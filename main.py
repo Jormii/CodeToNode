@@ -9,7 +9,7 @@ diffuse = "./Tests/diffuse.py"  # Its purpose is checking token scanning
 function = "./Tests/function.py"
 while_test = "./Tests/while.py"
 
-default_file = branching
+default_file = expression
 
 
 def print_tokens(tokens):
@@ -74,7 +74,7 @@ def interpret_statements(statements, debug=False, filename=default_file):
 
 
 def main():
-    tokens = scan_tokens(debug=True)
+    tokens = scan_tokens()
     statements = parse_tokens(tokens)
     interpret_statements(statements, debug=True)
 
