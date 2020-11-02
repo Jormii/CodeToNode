@@ -9,7 +9,7 @@ diffuse = "./Tests/diffuse.py"  # Its purpose is checking token scanning
 function = "./Tests/function.py"
 while_test = "./Tests/while.py"
 
-default_file = while_test
+default_file = function
 
 
 def print_tokens(tokens):

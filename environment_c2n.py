@@ -15,6 +15,9 @@ class Environment:
             log_error(
                 self.filename, name.line, ErrorStep.RUNTIME, "Error with variable \"{}\". Global variables aren't supported".format(name))
 
+        if self.indentation_level != 0 and is_function:
+            log_error(self.filename, name.line, ErrorStep.RUNTIME, "Local functions aren't supported")
+
         self.values[name.lexeme] = value
 
     def get(self, token):
