@@ -1,5 +1,4 @@
 from exception_c2n import ReturnException
-from logger_c2n import log_error, ErrorStep
 
 
 class Callable:

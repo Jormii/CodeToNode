@@ -20,6 +20,9 @@ def third():
     return None
 
 
+first()
+
+
 def main():
     first()
     second()

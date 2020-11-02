@@ -174,6 +174,10 @@ class Interpreter(VisitorInterface):
             log_error(self.filename, line, ErrorStep.RUNTIME,
                       "Trying to call a not callable instance")
 
+        if self.environment.indentation_level == 0:
+            log_error(self.filename, line, ErrorStep.RUNTIME,
+                      "Trying to call function \"{}\" from global scope".format(function.declaration.name.lexeme))
+
         arguments = []
         for arg in expression.arguments:
             arguments.append(self.evaluate(arg))
