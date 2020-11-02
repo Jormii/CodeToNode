@@ -1,3 +1,4 @@
+import statement_c2n as stmt
 from environment_c2n import Environment
 from token_c2n import TokenType
 from callable_c2n import Callable, CustomFunction
@@ -20,8 +21,71 @@ class Interpreter(VisitorInterface):
         return
 
     def interpret(self, statements):
+        self.check_unsupported_actions(statements)
+
         for statement in statements:
             self.execute(statement)
+
+    def check_unsupported_actions(self, statements):
+        self.check_for_single_return(statements)
+
+    def check_for_single_return(self, statements):
+        for statement in statements:
+            if not isinstance(statement, stmt.Function):
+                continue
+
+            body = statement.body
+            number_of_returns = 0
+            for func_stmt in body:
+                number_of_returns += self.count_number_of_returns(func_stmt)
+
+            name = statement.name.lexeme
+            line = statement.name.line
+            if number_of_returns == 0:
+                log_error(self.filename, line, ErrorStep.RUNTIME,
+                          "Function \"{}\" returns no values".format(name))
+            elif number_of_returns > 1:
+                log_error(self.filename, line, ErrorStep.RUNTIME,
+                          "Function \"{}\" has more than one return".format(name))
+
+            last_statement = body[-1]
+            if not isinstance(last_statement, stmt.Return):
+                log_error(self.filename, line, ErrorStep.RUNTIME,
+                          "Function \"{}\": The last statement must be a return statement".format(name))
+
+    def count_number_of_returns(self, statement):
+        if isinstance(statement, stmt.Block):
+            returns = 0
+            for stmt_in_block in statement.statements:
+                returns += self.count_number_of_returns(stmt_in_block)
+            return returns
+
+        if isinstance(statement, stmt.Expression):
+            return 0
+
+        if isinstance(statement, stmt.Function):
+            line = statement.name.line
+            log_error(self.filename, line, ErrorStep.RUNTIME,
+                      "Function \"{}\": Local functions aren't supported".format(statement.name.lexeme))
+
+        if isinstance(statement, stmt.If):
+            then_returns = self.count_number_of_returns(statement.then_branch)
+            else_returns = 0 if statement.else_branch is None else self.count_number_of_returns(
+                statement.else_branch)
+            return then_returns + else_returns
+
+        if isinstance(statement, stmt.Return):
+            return 1
+
+        if isinstance(statement, stmt.Variable):
+            return 0
+
+        if isinstance(statement, stmt.While):
+            log_error(self.filename, -1, ErrorStep.RUNTIME,
+                      "Shouldn't reach this point")
+
+        log_error(self.filename, -1, ErrorStep.RUNTIME,
+                  "Shouldn't reach this point")
 
     def execute(self, statement):
         statement.accept_visitor(self)
@@ -194,7 +258,8 @@ class Interpreter(VisitorInterface):
 
     def visit_while_statement(self, statement):
         line = statement.condition.operator.line
-        log_error(self.filename, line, ErrorStep.RUNTIME, "While loops aren't supported yet")
+        log_error(self.filename, line, ErrorStep.RUNTIME,
+                  "While loops aren't supported yet")
 
         condition = statement.condition
         body = statement.body

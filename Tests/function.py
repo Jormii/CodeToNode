@@ -1,5 +1,6 @@
 def add(a, b):
     addition = a + b
+    return addition
 
 
 def count(n):
@@ -7,31 +8,19 @@ def count(n):
         count(n - 1)
 
     c = n
+    return c
 
 
 def is_even(n):
-    if n == 0:
-        even = True
-    else:
-        is_odd(n - 1)
+    return n % 2 == 0
 
 
 def is_odd(n):
-    if n == 0:
-        even = False
-    else:
-        is_even(n - 1)
+    return not is_even(n)
 
 
 def fib(n):
-    def otro(m):
-        n = m
-
-    if n <= 1:
-        otro(n)
-        return n
-
-    return fib(n - 2) + fib(n - 1)
+    return 0
 
 
 :
