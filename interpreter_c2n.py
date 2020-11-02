@@ -193,6 +193,9 @@ class Interpreter(VisitorInterface):
             print("{} = {}".format(token_str, value))
 
     def visit_while_statement(self, statement):
+        line = statement.condition.operator.line
+        log_error(self.filename, line, ErrorStep.RUNTIME, "While loops aren't supported yet")
+
         condition = statement.condition
         body = statement.body
 
