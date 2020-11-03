@@ -1,4 +1,4 @@
-def main(a):
+def main():
     number = 1
     is_odd = not ((number % 2) == 0)
     greater_than_zero = number > 0

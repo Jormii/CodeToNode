@@ -22,6 +22,7 @@ def is_odd(n):
 def fib(n):
     return 0
 
+
 def main():
     p = 6
 

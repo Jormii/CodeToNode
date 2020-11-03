@@ -1,4 +1,4 @@
-:
+def main():
     counter = 2
     number = 49
     prime = True
