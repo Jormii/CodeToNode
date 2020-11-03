@@ -39,6 +39,16 @@ class Call(Expression):
         return visitor.visit_call_expression(self)
 
 
+class Get(Expression):
+
+    def __init__(self, obj, name):
+        self.obj = obj
+        self.name = name
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_get_expression(self)
+
+
 class Grouping(Expression):
 
     def __init__(self, expression):
@@ -66,6 +76,17 @@ class Logical(Expression):
 
     def accept_visitor(self, visitor):
         return visitor.visit_logical_expression(self)
+
+
+class Set(Expression):
+
+    def __init__(self, obj, name, value):
+        self.obj = obj
+        self.name = name
+        self.value = value
+
+    def accept_visitor(self, visitor):
+        return visitor.visit_set_expression(self)
 
 
 class Unary(Expression):

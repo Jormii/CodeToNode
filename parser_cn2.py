@@ -137,6 +137,8 @@ class Parser:
             if isinstance(value, expr.Variable):
                 token = value.token
                 return expr.Assignment(token, value)
+            elif isinstance(expression, expr.Get):
+                return expr.Set(expression.obj, expression.name, value)
 
             log_error(self.filename, assigment_token.line,
                       ErrorStep.PARSING, "Invalid assigment")
@@ -236,6 +238,9 @@ class Parser:
         while True:
             if self.match([TokenType.LEFT_PARENTHESIS]):
                 expression = self.finish_call(expression)
+            elif self.match([TokenType.DOT]):
+                name = self.consume(TokenType.IDENTIFIER)
+                expression = expr.Get(expression, name)
             else:
                 break
 

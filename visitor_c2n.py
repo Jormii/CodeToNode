@@ -10,6 +10,9 @@ class VisitorInterface:
     def visit_call_expression(self, expression):
         raise NotImplementedError()
 
+    def visit_get_expression(self, expression):
+        raise NotImplementedError()
+
     def visit_grouping_expression(self, expression):
         raise NotImplementedError()
 
@@ -17,6 +20,9 @@ class VisitorInterface:
         raise NotImplementedError()
 
     def visit_logical_expression(self, expression):
+        raise NotImplementedError()
+
+    def visit_set_expression(self, expression):
         raise NotImplementedError()
 
     def visit_unary_expression(self, expression):

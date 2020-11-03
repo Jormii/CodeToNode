@@ -278,6 +278,11 @@ class Interpreter(VisitorInterface):
 
         return function.call(self, arguments)
 
+    def visit_get_expression(self, expression):
+        obj = self.evaluate(expression.obj)
+        x = 0
+        # TODO
+
     def visit_grouping_expression(self, expression):
         return self.evaluate(expression.expression)
 
@@ -296,6 +301,11 @@ class Interpreter(VisitorInterface):
                 return left
 
         return self.evaluate(expression.right)
+
+    def visit_set_expression(self, expression):
+        obj = self.evaluate(expression.obj)
+        x = 0
+        # TODO
 
     def visit_unary_expression(self, expression):
         value = self.evaluate(expression.right)

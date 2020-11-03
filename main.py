@@ -7,10 +7,11 @@ branching = "./Tests/branching.py"
 expression = "./Tests/expression.py"
 diffuse = "./Tests/diffuse.py"  # Its purpose is checking token scanning
 function = "./Tests/function.py"
+properties = "./Tests/properties.py"
 recursion = "./Tests/recursion.py"
 while_test = "./Tests/while.py"
 
-default_file = recursion
+default_file = properties
 
 
 def print_tokens(tokens):
