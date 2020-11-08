@@ -1,4 +1,4 @@
-from visitor_c2n import VisitorAccepterInterface
+from transpiler.visitor_c2n import VisitorAccepterInterface
 
 
 class Statement(VisitorAccepterInterface):

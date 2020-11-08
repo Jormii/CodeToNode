@@ -1,11 +1,11 @@
-import expression_c2n as expr
-import statement_c2n as stmt
-from environment_c2n import Environment
-from token_c2n import Token, TokenType
-from callable_c2n import Callable, CustomFunction
-from visitor_c2n import VisitorInterface
-from exception_c2n import ReturnException
-from logger_c2n import log_error, ErrorStep
+import transpiler.expression_c2n as expr
+import transpiler.statement_c2n as stmt
+from transpiler.environment_c2n import Environment
+from transpiler.token_c2n import Token, TokenType
+from transpiler.callable_c2n import Callable, CustomFunction
+from transpiler.visitor_c2n import VisitorInterface
+from transpiler.exception_c2n import ReturnException
+from transpiler.logger_c2n import log_error, ErrorStep
 
 
 class Interpreter(VisitorInterface):

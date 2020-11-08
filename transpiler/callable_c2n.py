@@ -1,4 +1,4 @@
-from exception_c2n import ReturnException
+from transpiler.exception_c2n import ReturnException
 
 
 class Callable:

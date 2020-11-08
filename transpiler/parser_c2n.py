@@ -1,8 +1,8 @@
-import statement_c2n as stmt
-import expression_c2n as expr
-from token_c2n import TokenType
-from exception_c2n import ParsingException
-from logger_c2n import log_error, ErrorStep
+import transpiler.statement_c2n as stmt
+import transpiler.expression_c2n as expr
+from transpiler.token_c2n import TokenType
+from transpiler.exception_c2n import ParsingException
+from transpiler.logger_c2n import log_error, ErrorStep
 
 
 class Parser:

@@ -1,7 +1,7 @@
-from scanner_c2n import Scanner
-from parser_cn2 import Parser
-from interpreter_c2n import Interpreter
-from token_c2n import TokenType
+from transpiler.scanner_c2n import Scanner
+from transpiler.parser_c2n import Parser
+from transpiler.interpreter_c2n import Interpreter
+from transpiler.token_c2n import TokenType
 
 branching = "./Tests/branching.py"
 expression = "./Tests/expression.py"

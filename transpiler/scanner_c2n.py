@@ -2,8 +2,8 @@ import sys
 import keyword
 import numpy as np
 
-from token_c2n import Token, TokenType
-from logger_c2n import log_error, ErrorStep
+from transpiler.token_c2n import Token, TokenType
+from transpiler.logger_c2n import log_error, ErrorStep
 
 
 class Scanner:
